@@ -8,6 +8,8 @@ use App\Models\User;
 
 use App\Models\invitado;
 use App\Models\diagramador;
+use App\Models\grupo;
+use App\Models\link;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -106,13 +108,16 @@ class DiagramadorController extends Controller
         }
 
         $artefactos = artefacto::where('id_diagrama', $diagramador->id)->get();
-
+        $enlaces = link::where('id_diagrama', $diagramador->id)->get();
+        $grupos = grupo::where('id_diagrama', $diagramador->id)->get();
         // dd($invitadosArray);
         return view('diagramador.secuencia',[
             'diagramador' => $diagramador,
             'invitadosArray' => $invitadosArray,
             'user' => $user,
             'artefactos' => $artefactos,
+            'enlaces' => $enlaces,
+            'grupos' => $grupos,
         ]);
     }
 

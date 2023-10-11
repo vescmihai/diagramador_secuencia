@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArtefactoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DiagramadorController;
+use App\Http\Controllers\LinkController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,4 +38,5 @@ Route::middleware([
     Route::get('exportarCase', [DiagramadorController::class, 'exportarCase'])->name('exportarCase');
 
     Route::Post('artefactoStore', [ArtefactoController::class, 'store'])->name('artefactoStore');
+    Route::Post('linkStore', [LinkController::class, 'store'])->name('linkStore');
 });

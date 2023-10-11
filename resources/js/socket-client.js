@@ -12,7 +12,7 @@ socket.on('connect', function () {
 });
 
 socket.on('guestCount', (count) => {
-    console.warn('Número de invitados en la sala:', count);
+    console.log('Número de invitados en la sala:', count);
     //pasar count a la vista
     // document.getElementById('guestCount').innerText = count;
 });

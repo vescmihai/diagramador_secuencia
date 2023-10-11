@@ -380,17 +380,44 @@ class MessagingTool extends go.LinkingTool { //LinkingTool = crear enleces entre
                 newlink: newlink.data,
                 newact: newact
             };
-
+            guardarLink(puto);
             socket.emit('addlink', puto);
 
 
 
         }
-
-        // socket.emit('addActividad', actividad);
         return newlink;
     }
 }  //end MessagingTool
+
+
+function guardarLink(linker) {
+    let token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+
+    let formulario = new FormData();
+    formulario.append("from", linker.newlink.from);
+    formulario.append("to", linker.newlink.to);
+    formulario.append("text", linker.newlink.text);
+    formulario.append("time", linker.newlink.time);
+
+    formulario.append("group", linker.newact.group);
+    formulario.append("start", linker.newact.start);
+    formulario.append("duration", linker.newact.duration);
+    formulario.append("id_diagrama", id_diagrama_actual);
+
+    fetch('/linkStore', {
+        headers: {
+            "X-CSRF-TOKEN": token,
+        },
+        method: 'POST',
+        body: formulario
+
+    }).then((linker) => linker.json())
+        .then((linker) => {
+            console.log(linker);
+        });
+}
+
 
 
 class MessageDraggingTool extends go.DraggingTool {
@@ -444,8 +471,16 @@ class MessageDraggingTool extends go.DraggingTool {
 //recargar datos desde la base de datos
 var artefactos = document.querySelectorAll('input[name="artefactos"]');
 var artObjetos = JSON.parse(artefactos[0].value);
+
+var enlaces = document.querySelectorAll('input[name="enlaces"]');
+var enlacesObjetos = JSON.parse(enlaces[0].value);
+
+var grupos = document.querySelectorAll('input[name="grupos"]');
+var gruposObjetos = JSON.parse(grupos[0].value);
+
 var nodeDataArray = [];
 var grupo = [];
+var enlace = [];
 console.log('artefactos: ');
 for (const ar of artObjetos) {
     let arrayAuxiliar = {
@@ -456,8 +491,27 @@ for (const ar of artObjetos) {
         "duration": ar.duration
     }
     nodeDataArray.push(arrayAuxiliar);
-    let grupo = { "group": "qqqs", "start": 1, "duration": 2 }
-    nodeDataArray.push(grupo);
+    // let grupo = { "group": "qqqs", "start": 1, "duration": 2 }
+    // nodeDataArray.push(grupo);
+}
+
+for(const gr of gruposObjetos){
+    let arrayAuxiliar = {
+        "group": gr.group,
+        "start": gr.start,
+        "duration": gr.duration
+    }
+    nodeDataArray.push(arrayAuxiliar);
+}
+
+for (const en of enlacesObjetos) {
+    let arrayAuxiliar = {
+        "from": en.from,
+        "to": en.to,
+        "time": en.time,
+        "text": en.text
+    }
+    linkDataArray.push(arrayAuxiliar);
 }
 console.log('julico ', nodeDataArray);
 
@@ -488,7 +542,7 @@ console.log('julico ', nodeDataArray);
 var datos = {
     "class": "go.GraphLinksModel",
     "nodeDataArray": nodeDataArray,
-    "linkDataArray": [{ "from": "qqq", "to": "qqqs", "text": "order", "time": 1 },]
+    "linkDataArray": linkDataArray,
 }
 
 bt_save_object.addEventListener('click', function () {
@@ -560,24 +614,9 @@ function save() {
     miDiagrama.isModified = false;
 }
 function load() {
-    console.log('le di cargar en load ');
+    console.log('le di cargar en load ', datos);
     miDiagrama.model = go.Model.fromJson(datos);
 }
-
-// let btnCargar = document.getElementById('btnCargar');
-// btnCargar.addEventListener('click', function () {
-//     console.log('le di cargar');
-//     load();
-// });
-
-
-// let btnGuardar = document.getElementById('btnGuardar');
-// btnGuardar.addEventListener('click', function () {
-//     console.log('le di guardar');
-//     save();
-// });
-
-
 
 
 let modal_controler = document.getElementById('modal_controler');
@@ -598,12 +637,6 @@ socket.on('addArtefactoCliente', function (artefacto) {
 });
 
 
-// socket.on('addActividadCliente', function (actividad) {
-//     miDiagrama.startTransaction("addActividadCliente");
-//     // grupo.push(actividad);
-//     miDiagrama.model.addNodeData(actividad);
-//     miDiagrama.commitTransaction("addActividadCliente");
-// });
 socket.on('addlinkCliente', function (linker) {
     miDiagrama.startTransaction("addlinkCliente");
     miDiagrama.model.addNodeData(linker.newact);

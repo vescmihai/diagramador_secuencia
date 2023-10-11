@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\grupo;
 use App\Models\link;
 use Illuminate\Http\Request;
 
@@ -28,7 +29,24 @@ class LinkController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $link = new link();
+        $link->from = $request->from;
+        $link->to = $request->to;
+        $link->text = $request->text;
+        $link->time = $request->time;
+        $link->id_diagrama = $request->id_diagrama;
+        $link->save();
+
+        $grupo = new grupo();
+        $grupo->group = $request->group;
+        $grupo->start= $request->start;
+        $grupo->duration = $request->duration;
+        $grupo->id_diagrama = $request->id_diagrama;
+        $grupo->save();
+
+        return response()->json([
+            'message' => 'Link y grupo creado correctamente'
+        ]);
     }
 
     /**

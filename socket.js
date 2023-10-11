@@ -33,17 +33,12 @@ io.on('connection', socket => {
     });
 
     socket.on('addArtefacto', (artefacto) => {
-        console.log('artefacto xdxdxdxd');
+        console.log('artefacto ', artefacto);
         io.emit('addArtefactoCliente', artefacto);
     });
 
-    // socket.on('addActividad', (actividad) => {
-    //     console.log('actividad xdxdxdxd');
-    //     io.emit('addActividadCliente', actividad);
-    // });
-
     socket.on('addlink', (linker) => {
-        console.log('link xdxdxdxd', linker);
+        console.log('link ', linker);
         io.emit('addlinkCliente', linker);
     });
 
