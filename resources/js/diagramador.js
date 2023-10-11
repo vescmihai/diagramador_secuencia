@@ -20,6 +20,7 @@ var key_artefacto;
 var loc = '0 0';
 
 var miDiagrama;
+var linkDataArray = [];
 
 function init() {
     console.log('acabo de entrar a init()');
@@ -71,7 +72,7 @@ function init() {
                 selectionObjectName: "HEADER",
                 click: function (e, node) {
                     // Esta función se ejecutará cuando se haga clic en el nodo
-                    console.warn('le di click al titulo grupo: ', node.data.key);
+                    console.log('le di click al titulo grupo: ', node.data.key);
                     // console.warn(node.data);
 
                     // Abre aquí el modal o realiza las acciones que necesites
@@ -364,6 +365,7 @@ class MessagingTool extends go.LinkingTool { //LinkingTool = crear enleces entre
             const duration = 1;
             newlink.data.time = start;
             model.setDataProperty(newlink.data, "text", "index()");
+            console.log('julico newlink.data: ', newlink.data);
             // and create a new Activity node data in the "to" group data
             const newact = {
                 group: newlink.data.to,
@@ -373,8 +375,19 @@ class MessagingTool extends go.LinkingTool { //LinkingTool = crear enleces entre
             model.addNodeData(newact);
             // now make sure all Lifelines are long enough
             ensureLifelineHeights();
+
+            let puto = {
+                newlink: newlink.data,
+                newact: newact
+            };
+
+            socket.emit('addlink', puto);
+
+
+
         }
-        console.log('xdxd de ejecutar el insertLink()', newlink);
+
+        // socket.emit('addActividad', actividad);
         return newlink;
     }
 }  //end MessagingTool
@@ -428,30 +441,54 @@ class MessageDraggingTool extends go.DraggingTool {
 }
 // end MessageDraggingTool
 
-//loc es la ubicación del nodo, (eje x, eje y)
-//duration es la duración del nodo, linea de vida
+//recargar datos desde la base de datos
+var artefactos = document.querySelectorAll('input[name="artefactos"]');
+var artObjetos = JSON.parse(artefactos[0].value);
+var nodeDataArray = [];
+var grupo = [];
+console.log('artefactos: ');
+for (const ar of artObjetos) {
+    let arrayAuxiliar = {
+        "key": ar.key,
+        "text": ar.text,
+        "isGroup": ar.isGroup,
+        "loc": ar.loc,
+        "duration": ar.duration
+    }
+    nodeDataArray.push(arrayAuxiliar);
+    let grupo = { "group": "qqqs", "start": 1, "duration": 2 }
+    nodeDataArray.push(grupo);
+}
+console.log('julico ', nodeDataArray);
+
+// var datos = {
+// "class": "go.GraphLinksModel",
+// "nodeDataArray": [
+//     { "key": "1", "text": "Actor: Patron", "isGroup": true, "loc": "0 0", "duration": 9 },
+//     { "key": "2", "text": "Controller", "isGroup": true, "loc": "150 0", "duration": 9 },
+//     // { "key": "View", "text": "View", "isGroup": true, "loc": "250 0", "duration": 9 },
+//     // { "key": "Model", "text": "Model", "isGroup": true, "loc": "350 0", "duration": 9 },
+//     { "group": "2", "start": 1, "duration": 2 },
+//     // { "group": "View", "start": 2, "duration": 3 },
+//     // { "group": "Actor", "start": 3, "duration": 1 },
+//     // { "group": "Controller", "start": 5, "duration": 1 },
+//     // { "group": "Actor", "start": 6, "duration": 2 },
+//     // { "group": "Model", "start": 8, "duration": 1 }
+// ],
+// "linkDataArray": [
+//     { "from": "1", "to": "2", "text": "order", "time": 1 },
+//     // { "from": "Controller", "to": "View", "text": "order food", "time": 2 },
+//     // { "from": "Controller", "to": "Actor", "text": "serve drinks", "time": 3 },
+//     // { "from": "View", "to": "Controller", "text": "finish cooking", "time": 5 },
+//     // { "from": "Controller", "to": "Actor", "text": "serve food", "time": 6 },
+//     // { "from": "Actor", "to": "Model", "text": "pay", "time": 8 }
+// ]
+// }
+
 var datos = {
     "class": "go.GraphLinksModel",
-    "nodeDataArray": [
-        { "key": "1", "text": "Actor: Patron", "isGroup": true, "loc": "0 0", "duration": 9 },
-        { "key": "2", "text": "Controller", "isGroup": true, "loc": "150 0", "duration": 9 },
-        // { "key": "View", "text": "View", "isGroup": true, "loc": "250 0", "duration": 9 },
-        // { "key": "Model", "text": "Model", "isGroup": true, "loc": "350 0", "duration": 9 },
-        { "group": "2", "start": 1, "duration": 2 },
-        // { "group": "View", "start": 2, "duration": 3 },
-        // { "group": "Actor", "start": 3, "duration": 1 },
-        // { "group": "Controller", "start": 5, "duration": 1 },
-        // { "group": "Actor", "start": 6, "duration": 2 },
-        // { "group": "Model", "start": 8, "duration": 1 }
-    ],
-    "linkDataArray": [
-        { "from": "1", "to": "2", "text": "order", "time": 1 },
-        // { "from": "Controller", "to": "View", "text": "order food", "time": 2 },
-        // { "from": "Controller", "to": "Actor", "text": "serve drinks", "time": 3 },
-        // { "from": "View", "to": "Controller", "text": "finish cooking", "time": 5 },
-        // { "from": "Controller", "to": "Actor", "text": "serve food", "time": 6 },
-        // { "from": "Actor", "to": "Model", "text": "pay", "time": 8 }
-    ]
+    "nodeDataArray": nodeDataArray,
+    "linkDataArray": [{ "from": "qqq", "to": "qqqs", "text": "order", "time": 1 },]
 }
 
 bt_save_object.addEventListener('click', function () {
@@ -461,9 +498,9 @@ bt_save_object.addEventListener('click', function () {
     console.log('key: ', key);
     console.log('text: ', text);
 
-    console.warn('localizacion1 ',loc);
-    if(loc != '0 0'){
-        console.warn('localizacion2 ',loc);
+    console.warn('localizacion1 ', loc);
+    if (loc != '0 0') {
+        console.warn('localizacion2 ', loc);
         loc = parseInt(loc);
         console.log('loc1: ', loc);
         loc += 100;
@@ -478,12 +515,13 @@ bt_save_object.addEventListener('click', function () {
         loc: loc,
         duration: 9
     };
-    // ip_controller.value = '';
+
     // Agrega el nuevo nodo al modelo de datos del diagrama
     miDiagrama.model.addNodeData(newNodeData);
+    socket.emit('addArtefacto', newNodeData);
     guardarArtefacto(newNodeData);
     miDiagrama.select(miDiagrama.findNodeForKey(key));
-    if(loc == '0 0'){
+    if (loc == '0 0') {
         loc = parseInt(loc);
         loc += 150;
         loc = `${loc} 0`;
@@ -543,19 +581,41 @@ function load() {
 
 
 let modal_controler = document.getElementById('modal_controler');
-const abrir_modal_controller = (key,loc) => {
+const abrir_modal_controller = (key, loc) => {
     console.log('abrir_modal_controller');
-    console.log('la key es:', key,' ',loc);
+    console.log('la key es:', key, ' ', loc);
     // let datosxd = datos;
     var ultimaKey = key;
     var ultimaLoc = loc;
 }
 
+// socket cliente escucha eventos
 
-// var saveButton = document.getElementById('saveButton');
-// saveButton.onclick = function () {
-//     console.log('le di guardar');
-// }
+socket.on('addArtefactoCliente', function (artefacto) {
+    miDiagrama.startTransaction("addArtefactoCliente");
+    miDiagrama.model.addNodeData(artefacto);
+    miDiagrama.commitTransaction("addArtefactoCliente");
+});
+
+
+// socket.on('addActividadCliente', function (actividad) {
+//     miDiagrama.startTransaction("addActividadCliente");
+//     // grupo.push(actividad);
+//     miDiagrama.model.addNodeData(actividad);
+//     miDiagrama.commitTransaction("addActividadCliente");
+// });
+socket.on('addlinkCliente', function (linker) {
+    miDiagrama.startTransaction("addlinkCliente");
+    miDiagrama.model.addNodeData(linker.newact);
+    miDiagrama.model.addLinkData(linker.newlink);
+    miDiagrama.commitTransaction("addlinkCliente");
+});
+
+
+
+
+
+
 
 let bt_new_nodo = document.getElementById('bt_new_nodo');
 bt_new_nodo.addEventListener('click', function () {

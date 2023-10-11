@@ -32,6 +32,21 @@ io.on('connection', socket => {
         socket.emit('guestCount', guestCount);
     });
 
+    socket.on('addArtefacto', (artefacto) => {
+        console.log('artefacto xdxdxdxd');
+        io.emit('addArtefactoCliente', artefacto);
+    });
+
+    // socket.on('addActividad', (actividad) => {
+    //     console.log('actividad xdxdxdxd');
+    //     io.emit('addActividadCliente', actividad);
+    // });
+
+    socket.on('addlink', (linker) => {
+        console.log('link xdxdxdxd', linker);
+        io.emit('addlinkCliente', linker);
+    });
+
 
     socket.on('saludo', (user) => {
         // console.log(user);

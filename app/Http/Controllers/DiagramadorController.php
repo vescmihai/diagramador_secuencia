@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\artefacto;
 use ZipArchive;
 use App\Models\User;
 
@@ -104,11 +105,14 @@ class DiagramadorController extends Controller
             }
         }
 
+        $artefactos = artefacto::where('id_diagrama', $diagramador->id)->get();
+
         // dd($invitadosArray);
         return view('diagramador.secuencia',[
             'diagramador' => $diagramador,
             'invitadosArray' => $invitadosArray,
             'user' => $user,
+            'artefactos' => $artefactos,
         ]);
     }
 

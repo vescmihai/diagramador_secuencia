@@ -32,6 +32,7 @@
 
                     <div class="flex items-center text-gray-500 text-sm">
                         <input type="text" id="id_diagrama_actual" value="{{ $diagramador->id }}" class="hidden">
+                        <input type="text" id="artefactos" name="artefactos" value="{{ $artefactos }}" class="hidden">
                         <input type="text" id="id_user" value="{{ $user->id }}" class="">
                         @forelse ($invitadosArray as $i)
                             {{-- <span>{{ $i['invitado'] }}</span> --}}
