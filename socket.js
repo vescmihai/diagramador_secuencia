@@ -7,12 +7,23 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-io.on('connection', client => {
-    console.log('conectau ' + client.id);
+io.on('connection', socket => {
+    console.log('conectau ' + socket.id);
 
 
 
-    client.on('disconnect', () => {
+
+    socket.on('saludo', (user) => {
+        console.log(user);
+        const respuesta = "Hola cambita " + user;
+        io.emit('saludo_respuesta', respuesta);
+    });
+
+
+
+
+
+    socket.on('disconnect', () => {
         console.log('desconectau');
     });
 });

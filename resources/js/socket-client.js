@@ -10,8 +10,15 @@ socket.on('connect', function () {
     console.log('conectado con el servidor');
 });
 
-const user_id = "CAMBITAx2";
-socket.emit('saludo', user_id);
+
+const user = "Julico Suarez";
+socket.emit('saludo', user);
+
+// recibo el saludo del servidor y lo muestro en consola
+socket.on('saludo_respuesta', (respuesta) => {
+    console.log(respuesta);
+});
+
 
 // recibo el saludo del servidor y lo muestro en consola
 socket.on('saludo_respuesta', (respuesta) => {
