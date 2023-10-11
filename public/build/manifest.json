@@ -1,0 +1,45 @@
+{
+  "_axios-21b846bc.js": {
+    "file": "assets/axios-21b846bc.js"
+  },
+  "_index-fb0b8ccc.js": {
+    "file": "assets/index-fb0b8ccc.js"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-c4cb5009.css",
+    "isEntry": true,
+    "src": "resources/css/app.css"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-74f548be.js",
+    "imports": [
+      "_axios-21b846bc.js"
+    ],
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  },
+  "resources/js/bootstrap.js": {
+    "file": "assets/bootstrap-74f548be.js",
+    "imports": [
+      "_axios-21b846bc.js"
+    ],
+    "isEntry": true,
+    "src": "resources/js/bootstrap.js"
+  },
+  "resources/js/diagramador.js": {
+    "file": "assets/diagramador-c44c1ebf.js",
+    "imports": [
+      "_index-fb0b8ccc.js"
+    ],
+    "isEntry": true,
+    "src": "resources/js/diagramador.js"
+  },
+  "resources/js/socket-client.js": {
+    "file": "assets/socket-client-9f259d1e.js",
+    "imports": [
+      "_index-fb0b8ccc.js"
+    ],
+    "isEntry": true,
+    "src": "resources/js/socket-client.js"
+  }
+}
