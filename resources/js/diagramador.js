@@ -1,6 +1,12 @@
 import go from 'gojs';
 import { socket } from './socket-client';
-console.log('hola, estoy en diagrama de prueba');
+
+var id_diagrama_actual = document.getElementById('id_diagrama_actual').value;
+// var id_user = document.getElementById('id_user').value;
+
+
+
+
 window.addEventListener('DOMContentLoaded', init);
 
 const LinePrefix = 20;  // vertical starting point in document for all Messages and Activations
@@ -10,9 +16,11 @@ const ActivityWidth = 10;  // ancho de cada barra de actividad vertical
 const ActivityStart = 5;  // height before start message time
 const ActivityEnd = 5;  // height beyond end message time
 
-var key_modal_controller;
+var key_artefacto;
+var loc = '0 0';
 
 var miDiagrama;
+
 function init() {
     console.log('acabo de entrar a init()');
 
@@ -63,15 +71,16 @@ function init() {
                 selectionObjectName: "HEADER",
                 click: function (e, node) {
                     // Esta función se ejecutará cuando se haga clic en el nodo
-                    console.warn('le di click al titulo grupo: ');
+                    console.warn('le di click al titulo grupo: ', node.data.key);
                     // console.warn(node.data);
 
                     // Abre aquí el modal o realiza las acciones que necesites
                     // console.warn(node.data,);
                     // console.warn(e);
-                    key_modal_controller = node.data.key;
+                    key_artefacto = node.data.key;
+                    loc = node.data.loc;
                     // console.warn(  key_modal_controller);
-                    abrir_modal_controller();
+                    abrir_modal_controller(key_artefacto, loc);
                 }
             },
             new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
@@ -346,13 +355,15 @@ class MessagingTool extends go.LinkingTool { //LinkingTool = crear enleces entre
 
     insertLink(fromnode, fromport, tonode, toport) {
         const newlink = super.insertLink(fromnode, fromport, tonode, toport);
+        console.log('julico link: ', fromnode);
         if (newlink !== null) {
             const model = this.diagram.model;
+            console.log('julico model: ', model);
             // specify the time of the message
             const start = this.temporaryLink.time;
             const duration = 1;
             newlink.data.time = start;
-            model.setDataProperty(newlink.data, "text", "msg");
+            model.setDataProperty(newlink.data, "text", "index()");
             // and create a new Activity node data in the "to" group data
             const newact = {
                 group: newlink.data.to,
@@ -363,6 +374,7 @@ class MessagingTool extends go.LinkingTool { //LinkingTool = crear enleces entre
             // now make sure all Lifelines are long enough
             ensureLifelineHeights();
         }
+        console.log('xdxd de ejecutar el insertLink()', newlink);
         return newlink;
     }
 }  //end MessagingTool
@@ -421,27 +433,87 @@ class MessageDraggingTool extends go.DraggingTool {
 var datos = {
     "class": "go.GraphLinksModel",
     "nodeDataArray": [
-        { "key": "Actor", "text": "Actor: Patron", "isGroup": true, "loc": "0 0", "duration": 9 },
-        { "key": "Controller", "text": "Controller", "isGroup": true, "loc": "150 0", "duration": 9 },
-        { "key": "View", "text": "View", "isGroup": true, "loc": "250 0", "duration": 9 },
-        { "key": "Model", "text": "Model", "isGroup": true, "loc": "350 0", "duration": 9 },
-        { "group": "Controller", "start": 1, "duration": 2 },
-        { "group": "View", "start": 2, "duration": 3 },
-        { "group": "Actor", "start": 3, "duration": 1 },
-        { "group": "Controller", "start": 5, "duration": 1 },
-        { "group": "Actor", "start": 6, "duration": 2 },
-        { "group": "Model", "start": 8, "duration": 1 }
+        { "key": "1", "text": "Actor: Patron", "isGroup": true, "loc": "0 0", "duration": 9 },
+        { "key": "2", "text": "Controller", "isGroup": true, "loc": "150 0", "duration": 9 },
+        // { "key": "View", "text": "View", "isGroup": true, "loc": "250 0", "duration": 9 },
+        // { "key": "Model", "text": "Model", "isGroup": true, "loc": "350 0", "duration": 9 },
+        { "group": "2", "start": 1, "duration": 2 },
+        // { "group": "View", "start": 2, "duration": 3 },
+        // { "group": "Actor", "start": 3, "duration": 1 },
+        // { "group": "Controller", "start": 5, "duration": 1 },
+        // { "group": "Actor", "start": 6, "duration": 2 },
+        // { "group": "Model", "start": 8, "duration": 1 }
     ],
     "linkDataArray": [
-        { "from": "Actor", "to": "Controller", "text": "order", "time": 1 },
-        { "from": "Controller", "to": "View", "text": "order food", "time": 2 },
-        { "from": "Controller", "to": "Actor", "text": "serve drinks", "time": 3 },
-        { "from": "View", "to": "Controller", "text": "finish cooking", "time": 5 },
-        { "from": "Controller", "to": "Actor", "text": "serve food", "time": 6 },
-        { "from": "Actor", "to": "Model", "text": "pay", "time": 8 }
+        { "from": "1", "to": "2", "text": "order", "time": 1 },
+        // { "from": "Controller", "to": "View", "text": "order food", "time": 2 },
+        // { "from": "Controller", "to": "Actor", "text": "serve drinks", "time": 3 },
+        // { "from": "View", "to": "Controller", "text": "finish cooking", "time": 5 },
+        // { "from": "Controller", "to": "Actor", "text": "serve food", "time": 6 },
+        // { "from": "Actor", "to": "Model", "text": "pay", "time": 8 }
     ]
 }
 
+bt_save_object.addEventListener('click', function () {
+    console.warn('le di click en adicionar');
+    let key = document.getElementById('key').value;
+    let text = document.getElementById('text').value;
+    console.log('key: ', key);
+    console.log('text: ', text);
+
+    console.warn('localizacion1 ',loc);
+    if(loc != '0 0'){
+        console.warn('localizacion2 ',loc);
+        loc = parseInt(loc);
+        console.log('loc1: ', loc);
+        loc += 100;
+        loc = `${loc} 0`;
+        console.log('loc2: ', loc);
+    }
+
+    var newNodeData = {
+        key: key,
+        text: text,
+        isGroup: true,
+        loc: loc,
+        duration: 9
+    };
+    // ip_controller.value = '';
+    // Agrega el nuevo nodo al modelo de datos del diagrama
+    miDiagrama.model.addNodeData(newNodeData);
+    guardarArtefacto(newNodeData);
+    miDiagrama.select(miDiagrama.findNodeForKey(key));
+    if(loc == '0 0'){
+        loc = parseInt(loc);
+        loc += 150;
+        loc = `${loc} 0`;
+    }
+    document.getElementById('myModal').close();
+});
+
+function guardarArtefacto(newNodeData) {
+    let token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+    let tipo = document.getElementById('tipo').value;
+
+    let formulario = new FormData();
+    formulario.append("key", newNodeData.key);
+    formulario.append("text", newNodeData.text);
+    formulario.append("loc", loc);
+    formulario.append("tipo", tipo);
+    formulario.append("id_diagrama", id_diagrama_actual);
+
+    fetch('/artefactoStore', {
+        headers: {
+            "X-CSRF-TOKEN": token,
+        },
+        method: 'POST',
+        body: formulario
+
+    }).then((newNodeData) => newNodeData.json())
+        .then((newNodeData) => {
+            console.log(newNodeData);
+        });
+}
 
 
 function save() {
@@ -470,45 +542,20 @@ function load() {
 
 
 
-// let modal_controler = document.getElementById('modal_controler');
-// const abrir_modal_controller = (key) => {
-//     console.log('abrir_modal_controller');
-//     // miDialogo.showModal();
-//     modal_controler.classList.toggle('hidden');
-//     // console.log(key);
-//     // let datosxd = datos;
+let modal_controler = document.getElementById('modal_controler');
+const abrir_modal_controller = (key,loc) => {
+    console.log('abrir_modal_controller');
+    console.log('la key es:', key,' ',loc);
+    // let datosxd = datos;
+    var ultimaKey = key;
+    var ultimaLoc = loc;
+}
+
+
+// var saveButton = document.getElementById('saveButton');
+// saveButton.onclick = function () {
+//     console.log('le di guardar');
 // }
-
-
-// let bt_adicionar = document.getElementById('bt_adicionar');
-// let bt_sutmit_adicionar = document.getElementById('bt_sutmit_adicionar');
-// let ip_controller = document.getElementById('ip_controller');
-// let modal_new_controller = document.getElementById('modal_new_controller');
-// bt_adicionar.addEventListener('click', function () {
-//     console.log('click adicionar');
-//     //abrir el modal
-//     modal_new_controller.classList.toggle('hidden');
-
-// });
-// let locxd = 4;
-
-// bt_sutmit_adicionar.addEventListener('click', function () {
-//     console.warn('le di click en adicionar')
-//     var newNodeData = {
-//         key: ip_controller.value, //
-//         text: ip_controller.value, //
-//         isGroup: true, //
-//         loc: locxd + "00 0", //
-//         duration: 9 //
-//     };
-//     locxd = locxd + 1;
-//     modal_new_controller.classList.toggle('hidden');
-//     ip_controller.value = '';
-//     // Agrega el nuevo nodo al modelo de datos del diagrama
-//     miDiagrama.model.addNodeData(newNodeData);
-// });
-
-
 
 let bt_new_nodo = document.getElementById('bt_new_nodo');
 bt_new_nodo.addEventListener('click', function () {
@@ -519,7 +566,7 @@ bt_new_nodo.addEventListener('click', function () {
 
     //Crea un nuevo objeto de nodo
     var newNodeData = {
-        group: key_modal_controller, // Asigna el grupo al que pertenece el nodo
+        group: key_artefacto, // Asigna el grupo al que pertenece el nodo
         start: 2, // Propiedad personalizada "start"
         duration: 3 // Propiedad personalizada "duration"
     };

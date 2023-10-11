@@ -28,7 +28,20 @@ class ArtefactoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $a = new artefacto();
+        $a->key = $request->key;
+        $a->text = $request->text;
+        $a->isGroup = 'true';
+        $a->loc = $request->loc;
+        $a->duration = 9;
+        $a->tipo = $request->tipo;
+        $a->id_diagrama = $request->id_diagrama;
+        $a->save();
+
+        return response()->json([
+            'message' => 'Artefacto creado correctamente',
+            'artefacto' => $request->text,
+        ]);
     }
 
     /**

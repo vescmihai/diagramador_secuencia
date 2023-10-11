@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArtefactoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DiagramadorController;
 
@@ -33,6 +34,7 @@ Route::middleware([
 
 
     Route::get('exportarCodigoZip', [DiagramadorController::class, 'exportarCodigoZip'])->name('exportarCodigoZip');
-
     Route::get('exportarCase', [DiagramadorController::class, 'exportarCase'])->name('exportarCase');
+
+    Route::Post('artefactoStore', [ArtefactoController::class, 'store'])->name('artefactoStore');
 });

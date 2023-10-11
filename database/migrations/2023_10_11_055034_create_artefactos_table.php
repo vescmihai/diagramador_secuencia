@@ -18,6 +18,9 @@ return new class extends Migration
             $table->string('isGroup')->default('true')->nullable();
             $table->string('loc')->nullable();
             $table->string('duration')->default('9')->nullable();
+            $table->string('tipo')->nullable();
+            $table->unsignedBigInteger('id_diagrama');
+            $table->foreign('id_diagrama')->references('id')->on('diagramadors');
             $table->timestamps();
         });
     }

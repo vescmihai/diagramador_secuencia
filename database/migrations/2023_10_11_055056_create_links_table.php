@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('to')->nullable();
             $table->string('text')->nullable();
             $table->string('time')->nullable();
+            $table->unsignedBigInteger('id_diagrama');
+            $table->foreign('id_diagrama')->references('id')->on('diagramadors');
             $table->timestamps();
         });
     }

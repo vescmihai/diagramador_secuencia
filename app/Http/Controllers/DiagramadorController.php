@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use ZipArchive;
+use App\Models\User;
+
+use App\Models\invitado;
 use App\Models\diagramador;
 use Illuminate\Http\Request;
-
-use ZipArchive;
-use App\Models\invitado;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DiagramadorController extends Controller
 {
@@ -91,6 +92,7 @@ class DiagramadorController extends Controller
         // dd($diagramador);
         $id = auth()->user()->id;
         $invitados = invitado::where('id_diagrama', $diagramador->id)->get();
+        $user = User::where('id', $id)->first();
         // dd($invitados);
         $invitadosArray = [];
         foreach ($invitados as $i) {
@@ -101,8 +103,13 @@ class DiagramadorController extends Controller
                 ];
             }
         }
+
         // dd($invitadosArray);
-        return view('diagramador.secuencia',compact('invitadosArray'));
+        return view('diagramador.secuencia',[
+            'diagramador' => $diagramador,
+            'invitadosArray' => $invitadosArray,
+            'user' => $user,
+        ]);
     }
 
     /**
