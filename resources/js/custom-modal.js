@@ -6,7 +6,7 @@ bt_cerrar_modal.addEventListener('click', function () {
 
 const bt_abrir_modal = document.getElementById('bt_abrir_modal');
 bt_abrir_modal.addEventListener('click', function () {
-    console.log('abrir_modal');
+    // console.log('abrir_modal');
     document.getElementById('myModal').showModal();
 });
 

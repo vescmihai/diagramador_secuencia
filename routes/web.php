@@ -35,7 +35,7 @@ Route::middleware([
 
 
     Route::get('exportarCodigoZip', [DiagramadorController::class, 'exportarCodigoZip'])->name('exportarCodigoZip');
-    Route::get('exportarCase', [DiagramadorController::class, 'exportarCase'])->name('exportarCase');
+    Route::post('exportarCase/{diagramador}', [DiagramadorController::class, 'exportarCase'])->name('exportarCase');
 
     Route::Post('artefactoStore', [ArtefactoController::class, 'store'])->name('artefactoStore');
     Route::Post('linkStore', [LinkController::class, 'store'])->name('linkStore');

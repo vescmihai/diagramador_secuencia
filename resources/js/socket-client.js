@@ -25,11 +25,3 @@ socket.emit('saludo', user);
 socket.on('saludo_respuesta', (respuesta) => {
     console.log(respuesta);
 });
-
-
-
-
-// recibo el saludo del servidor y lo muestro en consola
-socket.on('saludo_respuesta', (respuesta) => {
-    console.log(respuesta);
-});

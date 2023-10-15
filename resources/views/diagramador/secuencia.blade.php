@@ -22,10 +22,13 @@
                         Exportar Código Zip
                     </a>
 
-                    <a href="{{ route('exportarCase') }}"
-                        class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded text-center">
-                        Exportar Case
-                    </a>
+                    <form action="{{ route('exportarCase', $diagramador->id) }}" method="POST" class="inline">
+                        @csrf
+                        @method('POST')
+                        <button type="submit"
+                            class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded text-center">Exportar
+                            Case</button>
+                    </form>
                     {{-- <button id="bt_new_nodo" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                         Agregar Artefacto
                     </button> --}}

@@ -47,10 +47,10 @@ io.on('connection', socket => {
         socket.broadcast.emit('addlinkCliente', linker);
     });
 
-    socket.on('movimiento',(linkxd, data) => {
-        console.log('movimiento ', data);
-        io.emit('moviemintoCliente', data);
-    });
+    // socket.on('movimiento',(linkxd, data) => {
+    //     console.log('movimiento ', data);
+    //     io.emit('moviemintoCliente', data);
+    // });
 
     socket.on('saludo', (user) => {
         // console.log(user);

@@ -1,10 +1,9 @@
- 
+
+import go from 'gojs';
 import { socket } from './socket-client';
 
 var id_diagrama_actual = document.getElementById('id_diagrama_actual').value;
 // var id_user = document.getElementById('id_user').value;
-
-
 
 
 window.addEventListener('DOMContentLoaded', init);
@@ -40,16 +39,16 @@ function init() {
             // automatically extend Lifelines as Activities are moved or resized
             "SelectionMoved": ensureLifelineHeights,
             "PartResized": ensureLifelineHeights,
-            "undoManager.isEnabled": true
+            // "undoManager.isEnabled": true
         },
     );
 
     // metodo que permite desactivar el boton de guardar cuando no hay cambios, y que no le de guardar varias veces
     miDiagrama.addDiagramListener("Modified", e => {
         // console.warn('acabo de ejecutar el addDiagramListener()');
-        // const button = document.getElementById("btnGuardar");
+        const button = document.getElementById("btnGuardar");
         // // console.log(button);
-        // if (button) button.disabled = !miDiagrama.isModified;
+        if (button) button.disabled = !miDiagrama.isModified;
         // const idx = document.title.indexOf("*");
         //  console.log();
         // if (miDiagrama.isModified) {
@@ -205,10 +204,6 @@ function init() {
     load(); //cargamos el diagrama
 };
 
-// function actualizarTamanio(tamanino){
-//     miDiagrama.model.setDataProperty("duration", tamanio);
-// }
-
 function ensureLifelineHeights(e) {
     // iterate over all Activities (ignore Groups)
     const arr = miDiagrama.model.nodeDataArray;
@@ -232,7 +227,8 @@ function ensureLifelineHeights(e) {
 
 // Función para calcular la altura de la línea de vida
 function computeLifelineHeight(duration) {
-    return LinePrefix + duration * MessageSpacing + LineSuffix + 100;
+    return LinePrefix + duration * MessageSpacing + LineSuffix;
+    // return LinePrefix + duration * MessageSpacing + LineSuffix + 100;
 }
 
 // Función para calcular la ubicación de una actividad
@@ -490,8 +486,8 @@ class MessageDraggingTool extends go.DraggingTool {
 
     // Anula para permitir el arrastre cuando la selección incluye solo enlaces.
     mayMove() {
-        let movimiento = !this.diagram.isReadOnly && this.diagram.allowMove;
-        return movimiento;
+        // let movimiento = !this.diagram.isReadOnly && this.diagram.allowMove;
+        return  !this.diagram.isReadOnly && this.diagram.allowMove;
     }
 
     // Anula para mover enlaces (asumidos como MessageLinks) actualizando su propiedad Link.data.time,
@@ -645,14 +641,13 @@ function load() {
 let modal_controler = document.getElementById('modal_controler');
 const abrir_modal_controller = (key, loc) => {
     console.log('abrir_modal_controller');
-    console.log('la key es:', key, ' ', loc);
+    console.log('la key es:', key);
     // let datosxd = datos;
     var ultimaKey = key;
     var ultimaLoc = loc;
 }
 
 // socket cliente escucha eventos
-
 socket.on('addArtefactoCliente', function (artefacto) {
     miDiagrama.startTransaction("addArtefactoCliente");
     miDiagrama.model.addNodeData(artefacto);
@@ -677,10 +672,10 @@ socket.on('addDurationCliente', function (gr, max) {
 });
 
 
-socket.on('moviemintoCliente', function (data) {
-    miDiagrama.startTransaction("moviemintoCliente");
-    miDiagrama.commitTransaction("moviemintoCliente");
-});
+// socket.on('moviemintoCliente', function (data) {
+//     miDiagrama.startTransaction("moviemintoCliente");
+//     miDiagrama.commitTransaction("moviemintoCliente");
+// });
 
 
 
