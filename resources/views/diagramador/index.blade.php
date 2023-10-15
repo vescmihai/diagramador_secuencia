@@ -1,6 +1,7 @@
 @extends('layouts.app') <!-- Asegúrate de que estés utilizando la plantilla de Laravel que deseas -->
 
 @section('content')
+
     @if (session('success'))
         <div class="animate-bounce fixed top-4 right-1/3 z-50" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)">
             <div id="toast-default"
@@ -19,108 +20,117 @@
         </div>
     @endif
 
-    <div class="container mx-auto mt-8">
-        <div class="w-full bg-white rounded-lg shadow-md p-4 m-2">
-            <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-semibold my-4">Diagramas</h1>
-            </div>
-            <div class="text-right w-full">
-                <form action="{{ route('diagramador.store') }}" method="POST" class="mb-4">
-                    @csrf
-                    <div class="flex justify-center mb-8">
-                        <input type="text" name="titulo" placeholder="Nombre del Diagrama" required
-                            class="border border-gray-300 px-4 py-2 rounded-l-md w-64">
-                        <button class="bg-green-500 text-white px-4 py-2 rounded-r-md">Crear</button>
-                    </div>
-                </form>
-            </div>
-
-            <table class="min-w-full border border-collapse border-gray-300">
-                <thead>
-                    <tr>
-                        <th class="border border-gray-300 px-4 py-2">ID</th>
-                        <th class="border border-gray-300 px-4 py-2">Título</th>
-                        <th class="border border-gray-300 px-4 py-2">Invitados</th>
-                        <th class="border border-gray-300 px-4 py-2">Autor</th>
-                        <th class="border border-gray-300 px-4 py-2">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{-- @dd($arrayDiagramas) --}}
-                    @foreach ($arrayDiagramas as $diagrama)
-                        {{-- @dd($diagrama) --}}
-                        <tr>
-                            <td class="border border-gray-300 px-4 py-2 text-center">{{ $diagrama['id_diagrama'] }}</td>
-                            <td class="border border-gray-300 px-4 py-2 text-center">{{ $diagrama['titulo'] }}</td>
-                            <td class="border border-gray-300 px-4 py-2 text-center">
-                                @foreach ($diagrama['invitados'] as $i)
-                                    <p>
-                                        {{ $i }}
-                                    </p>
-                                @endforeach
-                            </td>
-                            <td class="border border-gray-300 px-4 py-2">{{ $diagrama['autornombre'] }}</td>
-                            <td class="border border-gray-300 px-4 py-2 text-center">
-                                <div class="flex items-center justify-center">
-                                    <a href="{{ route('diagramador.edit', $diagrama['id_diagrama']) }}"
-                                        class="text-blue-500 hover:text-blue-700 mr-2">Editar</a>
-                                    <a href="{{ route('invitar', $diagrama['id_diagrama']) }}"
-                                        class="text-black hover:text-blue-700 mr-2">Invitar</a>
-                                    <a href="{{ route('diagramador.show', $diagrama['id_diagrama']) }}"
-                                        class="text-green-500 hover:text-green-700 mr-2">Trabajar</a>
-                                    <form action="{{ route('diagramador.destroy', $diagrama['id_diagrama']) }}"
-                                        method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:text-red-700">Eliminar</button>
-                                    </form>
-                                </div>
-                            </td>
-
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-    @if ($diagramasInvitados != null)
+    <div>
         <div class="container mx-auto mt-8">
-            <div class="w-full bg-white rounded-lg shadow-md p-4 m-2">
-                <h1 class="text-3xl font-semibold my-4">Invitaciones</h1>
+            <div class="w-full bg-white rounded-lg shadow-md p-4">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-semibold my-4">Diagramas</h1>
+                </div>
+                <div class="text-right w-full">
+                    <form action="{{ route('diagramador.store') }}" method="POST" class="mb-4">
+                        @csrf
+                        <div class="flex justify-center mb-8">
+                            <input type="text" name="titulo" placeholder="Nombre del Diagrama" required
+                                class="border border-gray-300 px-4 py-2 rounded-l-md w-64">
+                            <button class="bg-green-500 text-white px-4 py-2 rounded-r-md">Crear</button>
+                        </div>
+                    </form>
+                </div>
+
                 <table class="min-w-full border border-collapse border-gray-300">
                     <thead>
                         <tr>
                             <th class="border border-gray-300 px-4 py-2">ID</th>
                             <th class="border border-gray-300 px-4 py-2">Título</th>
+                            <th class="border border-gray-300 px-4 py-2">Invitados</th>
                             <th class="border border-gray-300 px-4 py-2">Autor</th>
                             <th class="border border-gray-300 px-4 py-2">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {{-- @dd($arrayDiagramas) --}}
-                        @foreach ($diagramasInvitados as $diagrama)
+                        @foreach ($arrayDiagramas as $diagrama)
                             {{-- @dd($diagrama) --}}
                             <tr>
-                                <td class="border border-gray-300 px-4 py-2 text-center">{{ $diagrama['id'] }}</td>
+                                <td class="border border-gray-300 px-4 py-2 text-center">{{ $diagrama['id_diagrama'] }}</td>
                                 <td class="border border-gray-300 px-4 py-2 text-center">{{ $diagrama['titulo'] }}</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ $diagrama['autornombre'] }}</td>
+                                <td class="border border-gray-300 px-4 py-2 text-center">
+                                    @foreach ($diagrama['invitados'] as $i)
+                                        <p>
+                                            {{ $i }}
+                                        </p>
+                                    @endforeach
+                                </td>
+                                <td class="border border-gray-300 px-4 py-2 text-center">{{ $diagrama['autornombre'] }}</td>
                                 <td class="border border-gray-300 px-4 py-2 text-center">
                                     <div class="flex items-center justify-center">
-                                        <a href="{{ route('diagramador.show', $diagrama['id']) }}"
+                                        <a href="{{ route('diagramador.edit', $diagrama['id_diagrama']) }}"
+                                            class="text-blue-500 hover:text-blue-700 mr-2">Editar</a>
+                                        <a href="{{ route('invitar', $diagrama['id_diagrama']) }}"
+                                            class="text-black hover:text-blue-700 mr-2">Invitar</a>
+                                        <a href="{{ route('diagramador.show', $diagrama['id_diagrama']) }}"
                                             class="text-green-500 hover:text-green-700 mr-2">Trabajar</a>
-                                        <form action="#" method="POST" class="inline">
+                                        <form action="{{ route('diagramador.destroy', $diagrama['id_diagrama']) }}"
+                                            method="POST" class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit"
-                                                class="text-red-500 hover:text-red-700">Abandonar</button>
+                                            <button type="submit" class="text-red-500 hover:text-red-700">Eliminar</button>
                                         </form>
                                     </div>
                                 </td>
-
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+
+
+    @if ($diagramasInvitados != null)
+        <div>
+            <div class="container mx-auto mt-8">
+                <div class="w-full bg-white rounded-lg shadow-md p-4">
+                    <h1 class="text-3xl font-semibold my-4">Invitaciones</h1>
+                    <table class="min-w-full border border-collapse border-gray-300">
+                        <thead>
+                            <tr>
+                                <th class="border border-gray-300 px-4 py-2">ID</th>
+                                <th class="border border-gray-300 px-4 py-2">Título</th>
+                                <th class="border border-gray-300 px-4 py-2">Autor</th>
+                                <th class="border border-gray-300 px-4 py-2">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{-- @dd($arrayDiagramas) --}}
+                            @foreach ($diagramasInvitados as $diagrama)
+                                {{-- @dd($diagrama) --}}
+                                <tr>
+                                    <td class="border border-gray-300 px-4 py-2 text-center">{{ $diagrama['id'] }}</td>
+                                    <td class="border border-gray-300 px-4 py-2 text-center">{{ $diagrama['titulo'] }}</td>
+                                    <td class="border border-gray-300 px-4 py-2 text-center">{{ $diagrama['autornombre'] }}
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-2 text-center">
+                                        <div class="flex items-center justify-center">
+                                            <a href="{{ route('diagramador.show', $diagrama['id']) }}"
+                                                class="text-green-500 hover:text-green-700 mr-2">Trabajar</a>
+                                            <form action="{{ route('invitadoDelete') }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('POST')
+                                                <input type="text" name="id_diagrama" value="{{ $diagrama['id'] }}" class="hidden">
+                                                <input type="text" name="id_invitado" value="{{ $email }}" class="hidden">
+                                                <button type="submit"
+                                                    class="text-red-500 hover:text-red-700">Abandonar</button>
+                                            </form>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     @endif

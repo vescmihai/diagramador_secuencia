@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('diagramadors', function (Blueprint $table) {
             $table->id();
             $table->String('titulo');
-            $table->String('invitados') ->nullable();
             $table->string('autornombre')->nullable();
             $table->unsignedBigInteger('autor');
             $table->foreign('autor')->references('id')->on('users');

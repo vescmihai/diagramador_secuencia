@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('invitado');
             $table->unsignedBigInteger('id_diagrama');
-            $table->foreign('id_diagrama')->references('id')->on('diagramadors')->onDelete('cascade');
+            $table->foreign('id_diagrama')->references('id')->on('diagramadors');
+            // ->onDelete('cascade');
             $table->timestamps();
         });
     }

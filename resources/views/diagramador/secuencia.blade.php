@@ -10,16 +10,21 @@
 
             <div class="flex justify-between">
                 <div class="flex space-x-4">
-                    {{-- <button id="bt_adicionar" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        bt_adicionar
-                    </button> --}}
                     <button id="bt_abrir_modal"
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center">
                         Agregar Artefacto
                     </button>
-                    <a href="{{ route('exportarCodigoZip') }}"
+                    <a href="{{ route('codeJava',$diagramador->id) }}"
                         class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-center">
-                        Exportar Código Zip
+                        Exportar codeJava
+                    </a>
+                    <a href="{{ route('codePy',$diagramador->id) }}"
+                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-center">
+                        Exportar codePy
+                    </a>
+                    <a href="{{ route('codePhp',$diagramador->id) }}"
+                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-center">
+                        Exportar codePhp
                     </a>
 
                     <form action="{{ route('exportarCase', $diagramador->id) }}" method="POST" class="inline">

@@ -60,6 +60,15 @@ class InvitadoController extends Controller
      */
     public function destroy(invitado $invitado)
     {
-        //
+        dd($invitado);
     }
+    public function invitadoDelete(Request $request)
+    {
+        // dd($request);
+        $Abandonar = invitado::where('invitado', $request->id_invitado)
+        ->where('id_diagrama', $request->id_diagrama)->first()->delete();
+
+        return redirect()->route('diagramador.index');
+    }
+
 }

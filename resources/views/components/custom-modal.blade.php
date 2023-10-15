@@ -20,7 +20,7 @@
                         {{-- datos para mi js by Julico --}}
                         <div>
                             <x-label for="key" value="{{ __('Nombre del Artefacto:') }}" />
-                            <x-input id="key" class="block mt-1 w-full" type="text" name="key"  required autofocus/>
+                            <x-input id="key" class="block mt-1 w-full" type="text" name="key" required autofocus/>
                         </div>
                         {{-- <div>
                             <x-label for="text" value="{{ __('Nombre:') }}" />

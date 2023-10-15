@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\ArtefactoController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DiagramadorController;
 use App\Http\Controllers\LinkController;
+use App\Http\Controllers\InvitadoController;
+use App\Http\Controllers\ArtefactoController;
+use App\Http\Controllers\DiagramadorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,9 +35,14 @@ Route::middleware([
     Route::Post('registrarInvitado', [DiagramadorController::class, 'registrarInvitado'])->name('registrarInvitado');
 
 
-    Route::get('exportarCodigoZip', [DiagramadorController::class, 'exportarCodigoZip'])->name('exportarCodigoZip');
+    // Route::get('exportarCodigoZip', [DiagramadorController::class, 'exportarCodigoZip'])->name('exportarCodigoZip');
+    Route::get('codeJava/{diagramador}', [DiagramadorController::class, 'codeJava'])->name('codeJava');
+    Route::get('codePy/{diagramador}', [DiagramadorController::class, 'codePy'])->name('codePy');
+    Route::get('codePhp/{diagramador}', [DiagramadorController::class, 'codePhp'])->name('codePhp');
     Route::post('exportarCase/{diagramador}', [DiagramadorController::class, 'exportarCase'])->name('exportarCase');
 
     Route::Post('artefactoStore', [ArtefactoController::class, 'store'])->name('artefactoStore');
     Route::Post('linkStore', [LinkController::class, 'store'])->name('linkStore');
+
+    Route::Post('invitadoDelete', [InvitadoController::class,'invitadoDelete'])->name('invitadoDelete');
 });

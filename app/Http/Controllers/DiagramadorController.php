@@ -22,6 +22,7 @@ class DiagramadorController extends Controller
     public function index()
     {
         $id = auth()->user()->id;
+        $email = auth()->user()->email;
         $diagramas = diagramador::where('autor', $id)->get();
         $arrayDiagramas = [];
         $invitados = [];
@@ -59,7 +60,7 @@ class DiagramadorController extends Controller
         // dd($diagramasInvitados);
 
 
-        return view('diagramador.index', compact('arrayDiagramas', 'diagramasInvitados'));
+        return view('diagramador.index', compact('arrayDiagramas', 'diagramasInvitados','email'));
     }
 
     /**
@@ -162,9 +163,9 @@ class DiagramadorController extends Controller
      */
     public function destroy(diagramador $diagramador)
     {
-        // Eliminar el registro de diagramador
+        // Eliminar el registro de diagramador y sus invitados
+        $eliminarInvitados = invitado::where('id_diagrama', $diagramador->id)->delete();
         $diagramador->delete();
-
         // Redirigir a la vista deseada después de la eliminación
         return redirect()->route('diagramador.index')->with('success', 'Diagrama eliminado correctamente');
     }
@@ -397,5 +398,115 @@ class DiagramadorController extends Controller
         ];
 
         return new Response($html, 200, $headers);
+    }
+
+    public function codeJava(diagramador $diagramador)
+    {
+        $artefactos = artefacto::where('id_diagrama', $diagramador->id)->get();
+        $enlaces = link::where('id_diagrama', $diagramador->id)->get();
+        $grupos = grupo::where('id_diagrama', $diagramador->id)->get();
+
+        $parte1 = '';
+        $parte2 = '';
+
+        $parte1 .='@Controller
+        public class ' . $diagramador->titulo .' {
+        ';
+        foreach($enlaces as $f){
+        $parte2 .='
+        @RequestMapping("/'. preg_replace('/[\s(){}\[\]-]/', '',$f->text) .'")
+        public String '. preg_replace('/[\s(){}\[\]-]/', '',$f->text) .'() {
+        // Lógica para mostrar una página de inicio
+        return "'. preg_replace('/[\s(){}\[\]-]/', '',$f->text) .'";
+        }
+        ';
+        }
+        $parte2 .='
+        }
+        ';
+
+        $parte1 .= $parte2;
+
+        $fecha = date('Y-m-d');
+
+        $headers = [
+            'Content-type'        => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="CodeJava-' . $fecha . '.java"',
+        ];
+
+        return new Response($parte1, 200, $headers);
+    }
+
+    public function codePy(diagramador $diagramador)
+    {
+        $enlaces = link::where('id_diagrama', $diagramador->id)->get();
+
+        $parte1 = '';
+        $parte2 = '';
+
+        $parte1 .='from django.shortcuts import render, redirect, get_object_or_404
+        from .' . $diagramador->titulo .' import Recurso
+        ';
+        foreach($enlaces as $f){
+        $parte2 .='
+        def '. preg_replace('/[\s(){}\[\]-]/', '',$f->text) .'(request):
+        # Lógica para mostrar una vista principal
+        return render(request,"'. preg_replace('/[\s(){}\[\]-]/', '',$f->text) .'")
+        ';
+        }
+
+        $parte1 .= $parte2;
+
+        $fecha = date('Y-m-d');
+
+        $headers = [
+            'Content-type'        => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="CodePy-' . $fecha . '.py"',
+        ];
+
+        return new Response($parte1, 200, $headers);
+    }
+
+    public function codePhp(diagramador $diagramador)
+    {
+        $artefactos = artefacto::where('id_diagrama', $diagramador->id)->get();
+        $enlaces = link::where('id_diagrama', $diagramador->id)->get();
+        $grupos = grupo::where('id_diagrama', $diagramador->id)->get();
+
+        $parte1 = '';
+        $parte2 = '';
+
+        $parte1 .='<?php
+
+        namespace App\Http\Controllers;
+
+        use App\Models\ ' . $diagramador->titulo .';
+        use Illuminate\Http\Request;
+
+        class ' . $diagramador->titulo .' extends Controller
+        {
+        ';
+        foreach($enlaces as $f){
+        $parte2 .='
+        public function '. preg_replace('/[\s(){}\[\]-]/', '',$f->text) .'()
+        {
+            // Lógica para mostrar una vista principal
+        }
+        ';
+        }
+        $parte2 .='
+        }
+        ';
+
+        $parte1 .= $parte2;
+
+        $fecha = date('Y-m-d');
+
+        $headers = [
+            'Content-type'        => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="CodePhp-' . $fecha . '.php"',
+        ];
+
+        return new Response($parte1, 200, $headers);
     }
 }
