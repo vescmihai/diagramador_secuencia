@@ -12,14 +12,3 @@ bt_abrir_modal.addEventListener('click', function () {
 
 
 let bt_save_object = document.getElementById('bt_save_object');
-
-
-
-// const abrir_modal_controller = (key) => {
-//     console.log('abrir_modal_controller');
-//     // miDialogo.showModal();
-//     // modal_controler.classList.toggle('hidden');
-//     console.log('la key es:', key);
-//     // let datosxd = datos;
-//     var ultimaKey = key;
-// }

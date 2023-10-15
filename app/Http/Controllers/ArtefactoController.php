@@ -30,7 +30,7 @@ class ArtefactoController extends Controller
     {
         $a = new artefacto();
         $a->key = $request->key;
-        $a->text = $request->text;
+        $a->text = $request->key;
         $a->isGroup = 'true';
         $a->loc = $request->loc;
         $a->duration = 9;

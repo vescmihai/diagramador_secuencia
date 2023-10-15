@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\artefacto;
 use App\Models\grupo;
 use App\Models\link;
 use Illuminate\Http\Request;
@@ -44,8 +45,14 @@ class LinkController extends Controller
         $grupo->id_diagrama = $request->id_diagrama;
         $grupo->save();
 
+        $nuevaDuracion = artefacto::where('id_diagrama', $request->id_diagrama)->get();
+        foreach($nuevaDuracion as $n){
+            $n->duration = $request->duracion;
+            $n->save();
+        }
+
         return response()->json([
-            'message' => 'Link y grupo creado correctamente'
+            'message' => 'Link y grupo se a creado y linea de vida actualizada'
         ]);
     }
 

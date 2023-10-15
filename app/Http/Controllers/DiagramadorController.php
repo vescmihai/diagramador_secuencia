@@ -110,6 +110,20 @@ class DiagramadorController extends Controller
         $artefactos = artefacto::where('id_diagrama', $diagramador->id)->get();
         $enlaces = link::where('id_diagrama', $diagramador->id)->get();
         $grupos = grupo::where('id_diagrama', $diagramador->id)->get();
+
+
+        $contadorGR = 0;
+        foreach ($grupos as $g) {
+            $contadorGR += $g->duration;
+        }
+
+        $contadorMAX = 0;
+        foreach($enlaces as $e){
+                $contadorMAX += $e->time;
+        }
+
+
+
         // dd($invitadosArray);
         return view('diagramador.secuencia',[
             'diagramador' => $diagramador,
@@ -118,6 +132,8 @@ class DiagramadorController extends Controller
             'artefactos' => $artefactos,
             'enlaces' => $enlaces,
             'grupos' => $grupos,
+            'gr' => $contadorGR,
+            'max' => $contadorMAX,
         ]);
     }
 
@@ -179,6 +195,7 @@ class DiagramadorController extends Controller
 
     public function exportarCodigoZip()
     {
+        $artefactos = artefacto::where('id_diagrama', $diagramador->id)->get();
         //Exportar el diagramador a un archivo comprimido, con el codigo fuente
         // Obtener el contenido de las vistas como texto
         $java = view('Exportar.java');

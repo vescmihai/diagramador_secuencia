@@ -33,15 +33,24 @@ io.on('connection', socket => {
     });
 
     socket.on('addArtefacto', (artefacto) => {
-        console.log('artefacto ', artefacto);
+        // console.log('artefacto ', artefacto);
         io.emit('addArtefactoCliente', artefacto);
     });
 
-    socket.on('addlink', (linker) => {
-        console.log('link ', linker);
-        io.emit('addlinkCliente', linker);
+    socket.on('addDuration',(gr,max) => {
+        console.log('duration ', gr,max);
+        socket.broadcast.emit('addDurationCliente', gr,max);
     });
 
+    socket.on('addlink', (linker) => {
+        // console.log('link ', linker);
+        socket.broadcast.emit('addlinkCliente', linker);
+    });
+
+    socket.on('movimiento',(linkxd, data) => {
+        console.log('movimiento ', data);
+        io.emit('moviemintoCliente', data);
+    });
 
     socket.on('saludo', (user) => {
         // console.log(user);

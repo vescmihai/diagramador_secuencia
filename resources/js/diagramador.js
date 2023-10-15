@@ -1,4 +1,4 @@
-import go from 'gojs';
+ 
 import { socket } from './socket-client';
 
 var id_diagrama_actual = document.getElementById('id_diagrama_actual').value;
@@ -40,16 +40,16 @@ function init() {
             // automatically extend Lifelines as Activities are moved or resized
             "SelectionMoved": ensureLifelineHeights,
             "PartResized": ensureLifelineHeights,
-            // "undoManager.isEnabled": true
+            "undoManager.isEnabled": true
         },
     );
 
     // metodo que permite desactivar el boton de guardar cuando no hay cambios, y que no le de guardar varias veces
     miDiagrama.addDiagramListener("Modified", e => {
         // console.warn('acabo de ejecutar el addDiagramListener()');
-        const button = document.getElementById("btnGuardar");
-        // console.log(button);
-        if (button) button.disabled = !miDiagrama.isModified;
+        // const button = document.getElementById("btnGuardar");
+        // // console.log(button);
+        // if (button) button.disabled = !miDiagrama.isModified;
         // const idx = document.title.indexOf("*");
         //  console.log();
         // if (miDiagrama.isModified) {
@@ -95,6 +95,9 @@ function init() {
                 //         fill: $GG(go.Brush, "Linear", { 0: "#bbdefb", 1: go.Brush.darkenBy("#bbdefb", 0.1) }),
                 //         stroke: null
                 //     }),
+                // $(go.Picture,
+                //     { maxSize: new go.Size(50, 50) },
+                //     new go.Binding("source", "img")),
                 $GG(go.Shape, "Rectangle",
                     {
                         fill: $GG(go.Brush, "Linear",
@@ -179,6 +182,7 @@ function init() {
             )
         );
 
+
     // define the Message Link template.
     miDiagrama.linkTemplate =
         $GG(MessageLink,  // defined below
@@ -193,14 +197,17 @@ function init() {
                     segmentIndex: 0,
                     segmentOffset: new go.Point(NaN, NaN),
                     isMultiline: false,
-                    editable: true
+                    editable: true,
                 },
-                new go.Binding("text", "text").makeTwoWay())
+                new go.Binding("text", "text").makeTwoWay()),
         );
 
     load(); //cargamos el diagrama
 };
 
+// function actualizarTamanio(tamanino){
+//     miDiagrama.model.setDataProperty("duration", tamanio);
+// }
 
 function ensureLifelineHeights(e) {
     // iterate over all Activities (ignore Groups)
@@ -209,7 +216,7 @@ function ensureLifelineHeights(e) {
     for (let i = 0; i < arr.length; i++) {
         const act = arr[i];
         if (act.isGroup) continue;
-        max = Math.max(max, act.start + act.duration);
+        max = Math.max(max, act.start);
     }
     if (max > 0) {
         // now iterate over only Groups
@@ -223,102 +230,111 @@ function ensureLifelineHeights(e) {
     }
 }
 
-
-
+// Función para calcular la altura de la línea de vida
 function computeLifelineHeight(duration) {
-    return LinePrefix + duration * MessageSpacing + LineSuffix;
+    return LinePrefix + duration * MessageSpacing + LineSuffix + 100;
 }
 
+// Función para calcular la ubicación de una actividad
 function computeActivityLocation(act) {
+    console.log('computeActivityLocation', act);
     const groupdata = miDiagrama.model.findNodeDataForKey(act.group);
     if (groupdata === null) return new go.Point();
-    // get location of Lifeline's starting point
+    // Obtener la ubicación del punto de inicio de la línea de vida
     const grouploc = go.Point.parse(groupdata.loc);
     return new go.Point(grouploc.x, convertTimeToY(act.start) - ActivityStart);
 }
+
+// Función para calcular la ubicación de una actividad cuando se revierte el proceso
 function backComputeActivityLocation(loc, act) {
+    let data = {
+        "loc": loc,
+        "act": act,
+        "ActivityStart": ActivityStart,
+    }
+    // socket.emit('ActivityLocation', (data));
     miDiagrama.model.setDataProperty(act, "start", convertYToTime(loc.y + ActivityStart));
 }
 
+// Función para calcular la altura de una actividad
 function computeActivityHeight(duration) {
     return ActivityStart + duration * MessageSpacing + ActivityEnd;
 }
+
+// Función para calcular la altura de una actividad cuando se revierte el proceso
 function backComputeActivityHeight(height) {
     return (height - ActivityStart - ActivityEnd) / MessageSpacing;
 }
 
-// time is just an abstract small non-negative integer
-// here we map between an abstract time and a vertical position
+// El tiempo es solo un entero pequeño no negativo
+// Aquí mapeamos entre un tiempo abstracto y una posición vertical
 function convertTimeToY(t) {
     return t * MessageSpacing + LinePrefix;
 }
+
+// Función para convertir una posición vertical en tiempo cuando se revierte el proceso
 function convertYToTime(y) {
     return (y - LinePrefix) / MessageSpacing;
 }
 
 
-//go.Link = personalizar las flechas entre nodos
+
+
+// Clase para personalizar los enlaces entre nodos
 class MessageLink extends go.Link {
     constructor() {
-        console.log('acabo de ejeuctar el contrsutor de MessageLink()');
-        super(); //ejecutar el contrsuctor de link
-        this.time = 0;  // use este valor de "tiempo" cuando este sea el enlace temporal
+        console.log('Acabo de ejecutar el constructor de MessageLink()');
+        super(); // Llama al constructor de la clase padre go.Link
+        this.time = 0;  // Usa este valor de "tiempo" cuando este sea el enlace temporal
     }
 
-    //metodo para obtener las coordenadas del punto de conexión
+    // Método para obtener las coordenadas del punto de conexión del enlace
     getLinkPoint(node, port, spot, from, ortho, othernode, otherport) {
-        const p = port.getDocumentPoint(go.Spot.Center);
+        const p = port.getDocumentPoint(go.Spot.Center); // Obtiene la posición del punto central del puerto
         const r = port.getDocumentBounds();
-        const op = otherport.getDocumentPoint(go.Spot.Center);
+        const op = otherport.getDocumentPoint(go.Spot.Center); // Obtiene la posición del punto central del puerto del otro nodo
 
         const data = this.data;
-        const time = data !== null ? data.time : this.time;  // Si no está enlazada, asuma que esta tiene su propia propiedad "time"
+        const time = data !== null ? data.time : this.time;  // Si no está enlazado, asume que tiene su propia propiedad "time"
 
-        const aw = this.getAnchoActividad(node, time);
+        const aw = this.getAnchoActividad(node, time); // Llama a una función para obtener el ancho de la actividad
         const x = (op.x > p.x ? p.x + aw / 2 : p.x - aw / 2);
-        const y = convertTimeToY(time);
-        return new go.Point(x, y); //devuelve las coordenadas del punto de conexión.
+        const y = convertTimeToY(time); // Convierte el tiempo en coordenadas Y
+        return new go.Point(x, y); // Devuelve las coordenadas del punto de conexión.
     }
 
-
-    //findActivityWidth - recibe un nodo y un tiempo, y devuelve el ancho de la actividad en ese momento.
+    // Método para calcular el ancho de la actividad
     getAnchoActividad(node, time) {
-        let aw = ActivityWidth; //ancho de la actividad
-        if (node instanceof go.Group) { //node es una instancia de la clase go.Group ?
-            // console.warn('node es una instancia de la clase go.Group');
-            //vea si hay un Nodo de Actividad en este punto; si no, conecte el enlace directamente con la línea de vida del Grupo
-
-            //si es grupo verificar si al menos un elemento cumple con ciertas condición
+        let aw = ActivityWidth; // Define el ancho de la actividad
+        if (node instanceof go.Group) { // Comprueba si el nodo es una instancia de la clase go.Group
             if (!node.memberParts.any(mem => {
                 const act = mem.data;
                 return (act !== null && act.start <= time && time <= act.start + act.duration);
             })) {
-                //si no cumple de retornara 0
-                aw = 0;
+                aw = 0; // Si no cumple con ciertas condiciones, el ancho de la actividad se establece en 0
             }
         }
         return aw;
     }
 
-    //devuelve la direccion de la flecha
+    // Método para determinar la dirección de la flecha del enlace
     getLinkDirection(node, port, linkpoint, spot, from, ortho, othernode, otherport) {
-        const p = port.getDocumentPoint(go.Spot.Center); //posición del punto central del puerto (port) del nodo actua
-        const op = otherport.getDocumentPoint(go.Spot.Center); // Se declara una variable op y se le asigna la posición del punto central del puerto (otherport)
-        const right = op.x > p.x;
-        return right ? 0 : 180;
-        //Esta línea devuelve un valor que representa la dirección del enlace. Si right es true, lo que significa que el enlace va hacia la derecha, devuelve 0
+        const p = port.getDocumentPoint(go.Spot.Center); // Obtiene la posición del punto central del puerto
+        const op = otherport.getDocumentPoint(go.Spot.Center); // Obtiene la posición del punto central del puerto del otro nodo
+        const right = op.x > p.x; // Comprueba si el enlace va hacia la derecha
+        return right ? 0 : 180; // Devuelve 0 si va hacia la derecha, o 180 si va hacia la izquierda
     }
 
-    //calcular los puntos de la flecha
+    // Método para calcular los puntos del enlace
     computePoints() {
-        if (this.fromNode === this.toNode) {  // also handle a reflexive link as a simple orthogonal loop
+        if (this.fromNode === this.toNode) {  // Maneja un enlace reflexivo como un bucle ortogonal simple
             const data = this.data;
-            const time = data !== null ? data.time : this.time;  // if not bound, assume this has its own "time" property
+            const time = data !== null ? data.time : this.time;  // Si no está enlazado, asume que tiene su propia propiedad "time"
             const p = this.fromNode.port.getDocumentPoint(go.Spot.Center);
             const aw = this.getAnchoActividad(this.fromNode, time);
 
             const x = p.x + aw / 2;
-            const y = convertTimeToY(time);
+            const y = convertTimeToY(time); // Convierte el tiempo en coordenadas Y
             this.clearPoints();
             this.addPoint(new go.Point(x, y));
             this.addPoint(new go.Point(x + 50, y));
@@ -330,65 +346,100 @@ class MessageLink extends go.Link {
         }
     }
 }
-// end MessageLink
+// Fin de MessageLink
 
-//clase para crear enlaces entre nodos
-class MessagingTool extends go.LinkingTool { //LinkingTool = crear enleces entre nodos
+
+
+// Clase para crear enlaces entre nodos
+class MessagingTool extends go.LinkingTool { // LinkingTool = crear enlaces entre nodos
+
     constructor() {
-        super();  //llama al constructor de la clase padre (go.LinkingTool)
-        console.log('acabo de ejecutar el constructor de MessagingTool()');
-        const $ = go.GraphObject.make; //enlace temporal
+        super();  // Llama al constructor de la clase padre (go.LinkingTool)
+        console.log('Acabo de ejecutar el constructor de MessagingTool()');
+        const $ = go.GraphObject.make; // Hace un enlace temporal
 
-        //crea una variable temporalLink
+        // Crea una variable temporalLink que define cómo se verá el enlace antes de crearse
         this.temporaryLink =
-            $(MessageLink,
+            $(MessageLink, // Utiliza la clase MessageLink para el enlace temporal
                 $(go.Shape, "Rectangle",
-                    { stroke: "black", strokeWidth: 2 }),
+                    { stroke: "black", strokeWidth: 2 }), // Define la forma del enlace
                 $(go.Shape,
-                    { toArrow: "Triangle", stroke: "black" }));
+                    { toArrow: "Triangle", stroke: "black" })); // Define la flecha al final del enlace
     }
 
+    // Se activa cuando se comienza a crear un enlace
     doActivate() {
         super.doActivate();
         const time = convertYToTime(this.diagram.firstInput.documentPoint.y);
-        this.temporaryLink.time = Math.ceil(time);  // round up to an integer value
+        this.temporaryLink.time = Math.ceil(time);  // Redondea hacia arriba a un valor entero
     }
 
+
     insertLink(fromnode, fromport, tonode, toport) {
+        const mensaje = prompt("Para eliminar el registro, ingresa 'confirmar':");
+        if (mensaje === null || mensaje.trim() === "") {
+            mensaje = "get()"; // Asigna el valor predeterminado
+        }
+
+        // msgLink contiene el valor ingresado o el valor predeterminado
+        // console.log("Mensaje ingresado:", msgLink);
+
+
+        // document.getElementById('myModallink').showModal();
+
+        // bt_save_link.addEventListener('click', () => {
+        //     var mensajeInput = document.getElementById('mensaje');
+        //     var metodoInput = document.getElementById('metodo');
+        //     // var modal = document.getElementById('myModallink');
+
+        //     // Obtén el valor del input
+        //     var mensaje = mensajeInput.value;
+        //     var metodo = metodoInput.value;
+
+        //     document.getElementById('myModallink').close();
+
+
+        //continua con la insersion del link
         const newlink = super.insertLink(fromnode, fromport, tonode, toport);
-        console.log('julico link: ', fromnode);
+        // console.log('Julico link: ', fromnode);
         if (newlink !== null) {
             const model = this.diagram.model;
-            console.log('julico model: ', model);
-            // specify the time of the message
+            // console.log('Julico model: ', model);
+            // Especifica el tiempo del mensaje
             const start = this.temporaryLink.time;
             const duration = 1;
             newlink.data.time = start;
-            model.setDataProperty(newlink.data, "text", "index()");
-            console.log('julico newlink.data: ', newlink.data);
-            // and create a new Activity node data in the "to" group data
+            model.setDataProperty(newlink.data, "text", mensaje);
+
+            // Crea un nuevo nodo de actividad en los datos del grupo "to"
             const newact = {
                 group: newlink.data.to,
                 start: start,
                 duration: duration
             };
             model.addNodeData(newact);
-            // now make sure all Lifelines are long enough
+
+            // Asegura que todas las líneas de vida tengan suficiente altura
             ensureLifelineHeights();
 
+            console.log('julico duratio ', model.Tc[0].duration);
+            // Crea un objeto "puto" con información del nuevo enlace y actividad
             let puto = {
                 newlink: newlink.data,
-                newact: newact
+                newact: newact,
+                duracion: model.Tc[0].duration,
+                metodo: metodo,
             };
-            guardarLink(puto);
-            socket.emit('addlink', puto);
-
-
-
+            guardarLink(puto); // Llama a una función "guardarLink" y emite un evento "addlink" a través de un socket.
+            socket.emit('addlink', (puto));
         }
+        // mensajeInput.value = "";
+        // metodoInput.value = "";
         return newlink;
+        // });
     }
-}  //end MessagingTool
+}  // Fin de MessagingTool
+
 
 
 function guardarLink(linker) {
@@ -404,6 +455,7 @@ function guardarLink(linker) {
     formulario.append("start", linker.newact.start);
     formulario.append("duration", linker.newact.duration);
     formulario.append("id_diagrama", id_diagrama_actual);
+    formulario.append("duracion", linker.duracion);
 
     fetch('/linkStore', {
         headers: {
@@ -419,54 +471,51 @@ function guardarLink(linker) {
 }
 
 
-
 class MessageDraggingTool extends go.DraggingTool {
-    // anular el comportamiento estándar para incluir todos los enlaces seleccionados,
-    // even if not connected with any selected Nodes
-    // constructor() {
-    //   console.log('acabo de ejecutarse  MessageDraggingTool()');
-    // }
-
+    // Anula el comportamiento estándar para incluir todos los enlaces seleccionados,
+    // incluso si no están conectados a ningún nodo seleccionado.
     computeEffectiveCollection(parts, options) {
         const result = super.computeEffectiveCollection(parts, options);
-        // add a dummy Node so that the user can select only Links and move them all
+        // Agrega un Nodo ficticio para que el usuario pueda seleccionar solo los enlaces y moverlos todos.
         result.add(new go.Node(), new go.DraggingInfo(new go.Point()));
-        // normally this method removes any links not connected to selected nodes;
-        // we have to add them back so that they are included in the "parts" argument to moveParts
+        // Normalmente, este método elimina cualquier enlace no conectado a nodos seleccionados;
+        // debemos agregarlos de nuevo para que estén incluidos en el argumento "parts" en moveParts.
         parts.each(part => {
             if (part instanceof go.Link) {
                 result.add(part, new go.DraggingInfo(part.getPoint(0).copy()));
             }
-        })
+        });
         return result;
     }
 
-    // override to allow dragging when the selection only includes Links
+    // Anula para permitir el arrastre cuando la selección incluye solo enlaces.
     mayMove() {
-        return !this.diagram.isReadOnly && this.diagram.allowMove;
+        let movimiento = !this.diagram.isReadOnly && this.diagram.allowMove;
+        return movimiento;
     }
 
-    // override to move Links (which are all assumed to be MessageLinks) by
-    // updating their Link.data.time property so that their link routes will
-    // have the correct vertical position
+    // Anula para mover enlaces (asumidos como MessageLinks) actualizando su propiedad Link.data.time,
+    // de modo que las rutas de los enlaces tengan la posición vertical correcta.
     moveParts(parts, offset, check) {
+        console.log('Julico parts: ', parts);
         super.moveParts(parts, offset, check);
         const it = parts.iterator;
         while (it.next()) {
             if (it.key instanceof go.Link) {
                 const link = it.key;
-                const startY = it.value.point.y;  // DraggingInfo.point.y
-                let y = startY + offset.y;  // determine new Y coordinate value for this link
+                const startY = it.value.point.y;  // La coordenada Y de DraggingInfo.point
+                let y = startY + offset.y;  // Determina el nuevo valor de coordenada Y para este enlace
                 const cellY = this.gridSnapCellSize.height;
-                y = Math.round(y / cellY) * cellY;  // snap to multiple of gridSnapCellSize.height
+                y = Math.round(y / cellY) * cellY;  // Ajusta a un múltiplo de gridSnapCellSize.height
                 const t = Math.max(0, convertYToTime(y));
-                link.diagram.model.set(link.data, "time", t);
+                link.diagram.model.set(link, "time", data);
                 link.invalidateRoute();
             }
         }
     }
 }
-// end MessageDraggingTool
+// Fin de MessageDraggingTool
+
 
 //recargar datos desde la base de datos
 var artefactos = document.querySelectorAll('input[name="artefactos"]');
@@ -491,11 +540,9 @@ for (const ar of artObjetos) {
         "duration": ar.duration
     }
     nodeDataArray.push(arrayAuxiliar);
-    // let grupo = { "group": "qqqs", "start": 1, "duration": 2 }
-    // nodeDataArray.push(grupo);
 }
 
-for(const gr of gruposObjetos){
+for (const gr of gruposObjetos) {
     let arrayAuxiliar = {
         "group": gr.group,
         "start": gr.start,
@@ -515,30 +562,6 @@ for (const en of enlacesObjetos) {
 }
 console.log('julico ', nodeDataArray);
 
-// var datos = {
-// "class": "go.GraphLinksModel",
-// "nodeDataArray": [
-//     { "key": "1", "text": "Actor: Patron", "isGroup": true, "loc": "0 0", "duration": 9 },
-//     { "key": "2", "text": "Controller", "isGroup": true, "loc": "150 0", "duration": 9 },
-//     // { "key": "View", "text": "View", "isGroup": true, "loc": "250 0", "duration": 9 },
-//     // { "key": "Model", "text": "Model", "isGroup": true, "loc": "350 0", "duration": 9 },
-//     { "group": "2", "start": 1, "duration": 2 },
-//     // { "group": "View", "start": 2, "duration": 3 },
-//     // { "group": "Actor", "start": 3, "duration": 1 },
-//     // { "group": "Controller", "start": 5, "duration": 1 },
-//     // { "group": "Actor", "start": 6, "duration": 2 },
-//     // { "group": "Model", "start": 8, "duration": 1 }
-// ],
-// "linkDataArray": [
-//     { "from": "1", "to": "2", "text": "order", "time": 1 },
-//     // { "from": "Controller", "to": "View", "text": "order food", "time": 2 },
-//     // { "from": "Controller", "to": "Actor", "text": "serve drinks", "time": 3 },
-//     // { "from": "View", "to": "Controller", "text": "finish cooking", "time": 5 },
-//     // { "from": "Controller", "to": "Actor", "text": "serve food", "time": 6 },
-//     // { "from": "Actor", "to": "Model", "text": "pay", "time": 8 }
-// ]
-// }
-
 var datos = {
     "class": "go.GraphLinksModel",
     "nodeDataArray": nodeDataArray,
@@ -548,9 +571,9 @@ var datos = {
 bt_save_object.addEventListener('click', function () {
     console.warn('le di click en adicionar');
     let key = document.getElementById('key').value;
-    let text = document.getElementById('text').value;
+    // let text = document.getElementById('text').value;
     console.log('key: ', key);
-    console.log('text: ', text);
+    // console.log('text: ', text);
 
     console.warn('localizacion1 ', loc);
     if (loc != '0 0') {
@@ -564,7 +587,7 @@ bt_save_object.addEventListener('click', function () {
 
     var newNodeData = {
         key: key,
-        text: text,
+        text: key,
         isGroup: true,
         loc: loc,
         duration: 9
@@ -641,32 +664,58 @@ socket.on('addlinkCliente', function (linker) {
     miDiagrama.startTransaction("addlinkCliente");
     miDiagrama.model.addNodeData(linker.newact);
     miDiagrama.model.addLinkData(linker.newlink);
+    ensureLifelineHeights();
+    // miDiagrama.model.setDataProperty(linker.gr, "duration", linker.max);
     miDiagrama.commitTransaction("addlinkCliente");
 });
 
-
-
-
-
-
-
-let bt_new_nodo = document.getElementById('bt_new_nodo');
-bt_new_nodo.addEventListener('click', function () {
-    console.log('le di click en bt_new_nodo');
-    // modal_controler.classList.toggle('hidden');
-    //calcular la ubicaoin en pixles
-
-
-    //Crea un nuevo objeto de nodo
-    var newNodeData = {
-        group: key_artefacto, // Asigna el grupo al que pertenece el nodo
-        start: 2, // Propiedad personalizada "start"
-        duration: 3 // Propiedad personalizada "duration"
-    };
-
-    // Agrega el nuevo nodo al modelo de datos del diagrama
-    miDiagrama.model.addNodeData(newNodeData);
-
-    // Luego, puedes forzar la actualización de la vista del diagrama para mostrar el nuevo nodo
-    miDiagrama.requestUpdate(); // Refresca la vista del diagra
+socket.on('addDurationCliente', function (gr, max) {
+    console.log('addDurationCliente');
+    miDiagrama.startTransaction("addDurationCliente");
+    miDiagrama.model.setDataProperty(gr, "duration", max);
+    miDiagrama.commitTransaction("addDurationCliente");
 });
+
+
+socket.on('moviemintoCliente', function (data) {
+    miDiagrama.startTransaction("moviemintoCliente");
+    miDiagrama.commitTransaction("moviemintoCliente");
+});
+
+
+
+// socket.on('ActivityLocationCliente', function (data) {
+//     console.log('ActivityLocationCliente',data.act, data.loc);
+//     miDiagrama.startTransaction("ActivityLocationCliente");
+//     miDiagrama.model.setDataProperty(data.act, "start", convertYToTime(data.loc.y + data.ActivityStart));
+//     // miDiagrama.model.setDataProperty(act, "start", convertYToTime(loc.y + ActivityStart));
+//     // computeActivityLocation(data.act);
+//     // backComputeActivityLocation(data.loc, data.act);
+//     miDiagrama.commitTransaction("ActivityLocationCliente");
+// });
+
+
+
+
+
+
+// let bt_new_nodo = document.getElementById('bt_new_nodo');
+// bt_new_nodo.addEventListener('click', function () {
+//     console.log('le di click en bt_new_nodo');
+//     // modal_controler.classList.toggle('hidden');
+//     //calcular la ubicaoin en pixles
+
+
+//     //Crea un nuevo objeto de nodo
+//     var newNodeData = {
+//         group: key_artefacto, // Asigna el grupo al que pertenece el nodo
+//         start: 2, // Propiedad personalizada "start"
+//         duration: 3 // Propiedad personalizada "duration"
+//     };
+
+//     // Agrega el nuevo nodo al modelo de datos del diagrama
+//     miDiagrama.model.addNodeData(newNodeData);
+
+//     // Luego, puedes forzar la actualización de la vista del diagrama para mostrar el nuevo nodo
+//     miDiagrama.requestUpdate(); // Refresca la vista del diagra
+// });
