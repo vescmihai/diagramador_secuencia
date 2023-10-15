@@ -1,0 +1,1 @@
+const e=document.getElementById("bt_cerrar_modal");e.addEventListener("click",function(){document.getElementById("myModal").close()});const t=document.getElementById("bt_abrir_modal");t.addEventListener("click",function(){document.getElementById("myModal").showModal()});document.getElementById("bt_save_object");
