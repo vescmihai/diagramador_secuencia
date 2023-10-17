@@ -1,1 +1,0 @@
-import{l as t}from"./index-fb0b8ccc.js";const o=t("http://localhost:3000",{transports:["websocket"]});o.on("connect",function(){console.log("conectado con el servidor"),o.emit("getGuestCount")});o.on("guestCount",e=>{console.log("Número de invitados en la sala:",e)});const s=document.getElementById("id_user").value;o.emit("saludo",s);o.on("saludo_respuesta",e=>{console.log(e)});

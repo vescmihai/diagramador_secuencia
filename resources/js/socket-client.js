@@ -1,7 +1,8 @@
 import { io } from 'socket.io-client';
 // import go from 'gojs';
 
-export const socket = io('http://localhost:3000', {
+// export const socket = io('http://localhost:3000', {
+export const socket = io('http://juliosuarez.tech:3000', {
     transports: ['websocket'],
 });
 
