@@ -410,7 +410,7 @@ class DiagramadorController extends Controller
         $parte2 = '';
 
         $parte1 .='@Controller
-        public class ' . $diagramador->titulo .' {
+        public class ' . preg_replace('/[\s(){}\[\]-]/', '',$diagramador->titulo) .' {
         ';
         foreach($enlaces as $f){
         $parte2 .='
