@@ -32,7 +32,7 @@
     "src": "resources/js/custom-modal.js"
   },
   "resources/js/diagramador.js": {
-    "file": "assets/diagramador-e76c7e49.js",
+    "file": "assets/diagramador-8cb79b5d.js",
     "imports": [
       "_index-fb0b8ccc.js"
     ],
@@ -45,7 +45,7 @@
     "src": "resources/js/modal-link.js"
   },
   "resources/js/socket-client.js": {
-    "file": "assets/socket-client-2e7fa625.js",
+    "file": "assets/socket-client-08f937dc.js",
     "imports": [
       "_index-fb0b8ccc.js"
     ],
