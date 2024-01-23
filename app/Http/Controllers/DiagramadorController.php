@@ -14,6 +14,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Barryvdh\DomPDF\Facade\Pdf;
 
+
+use App\Mail\CorreosMailable;
+use Illuminate\Support\Facades\Mail;
+
 class DiagramadorController extends Controller
 {
     /**
@@ -60,7 +64,7 @@ class DiagramadorController extends Controller
         // dd($diagramasInvitados);
 
 
-        return view('diagramador.index', compact('arrayDiagramas', 'diagramasInvitados','email'));
+        return view('diagramador.index', compact('arrayDiagramas', 'diagramasInvitados', 'email'));
     }
 
     /**
@@ -173,7 +177,8 @@ class DiagramadorController extends Controller
     public function invitar(diagramador $diagramador)
     {
         // dd($diagramador);
-        return view('diagramador.invitado', compact('diagramador'));
+        $invitados = invitado::where('id_diagrama', $diagramador->id)->get();
+        return view('diagramador.invitado', compact('diagramador', 'invitados'));
     }
     public function registrarInvitado(Request $request)
     {
@@ -183,8 +188,13 @@ class DiagramadorController extends Controller
         $invitado->id_diagrama = $request->id_diagrama;
         $invitado->save();
 
-        return redirect()->route('diagramador.index');
+        $correo = new CorreosMailable($request->invitado);
+        Mail::to($request->invitado)->send($correo);
+
+        return redirect()->route('diagramador.index')->with('success', 'Invitaciones enviadas');
     }
+
+
 
     public function eliminarInvitado(invitado $invitado)
     {
@@ -272,10 +282,10 @@ class DiagramadorController extends Controller
                                 <UML:TaggedValue tag="gentype" value="&lt;none&gt;"/>
                             </UML:ModelElement.taggedValue>
                             <UML:Namespace.ownedElement>';
-                            $actor = '';
-                            foreach ($artefactos as $f) {
-                                if ($f->tipo == 'actor') {
-                    $actor .= '<UML:Actor name="' . $f->text . '" xmi.id="EAID_60C48589_16F7_4c60_B7B2_862227190FC' . $f->id . '" visibility="public" namespace="EAPK_68FDBDA8_B4B6_41a3_90A1_3301F4D1425D" isRoot="false" isLeaf="false" isAbstract="false">
+        $actor = '';
+        foreach ($artefactos as $f) {
+            if ($f->tipo == 'actor') {
+                $actor .= '<UML:Actor name="' . $f->text . '" xmi.id="EAID_60C48589_16F7_4c60_B7B2_862227190FC' . $f->id . '" visibility="public" namespace="EAPK_68FDBDA8_B4B6_41a3_90A1_3301F4D1425D" isRoot="false" isLeaf="false" isAbstract="false">
                                     <UML:ModelElement.taggedValue>
                                         <UML:TaggedValue tag="isSpecification" value="false"/>
                                         <UML:TaggedValue tag="ea_stype" value="Actor"/>
@@ -299,17 +309,17 @@ class DiagramadorController extends Controller
                                     </UML:ModelElement.taggedValue>
                                 </UML:Actor>
                                 ';
-                                }
-                            }
-                            $html .= $actor;
-                            $objetos = '';
-                            $objetos .= '
+            }
+        }
+        $html .= $actor;
+        $objetos = '';
+        $objetos .= '
                                 <UML:Collaboration xmi.id="EAID_68FDBDA8_B4B6_41a3_90A1_3301F4D1425D_Collaboration" name="Collaborations">
                                     <UML:Namespace.ownedElement>';
-                                    $iterador = 3;
-                                    foreach ($artefactos as $f) {
-                                    if ($f->tipo != 'actor') {
-                                    $objetos .= '
+        $iterador = 3;
+        foreach ($artefactos as $f) {
+            if ($f->tipo != 'actor') {
+                $objetos .= '
                                         <UML:ClassifierRole name="' . $f->text . '" xmi.id="EAID_60C48589_16F7_4c60_B7B2_862227190FC' . $f->id . '" visibility="public" base="EAID_11111111_5487_4080_A7F4_41526CB0AA00">
                                             <UML:ModelElement.taggedValue>
                                                 <UML:TaggedValue tag="isAbstract" value="false"/>
@@ -329,19 +339,83 @@ class DiagramadorController extends Controller
                                                 <UML:TaggedValue tag="complexity" value="1"/>
                                                 <UML:TaggedValue tag="status" value="Proposed"/>
                                                 <UML:TaggedValue tag="tpos" value="0"/>
-                                                <UML:TaggedValue tag="ea_localid" value="' . $iterador . '"/>
+                                                <UML:TaggedValue tag="ea_localid" value="' . $f->id . '"/>
                                                 <UML:TaggedValue tag="ea_eleType" value="element"/>
                                                 <UML:TaggedValue tag="style" value="BackColor=-1;BorderColor=-1;BorderWidth=-1;FontColor=-1;VSwimLanes=1;HSwimLanes=1;BorderStyle=0;"/>
                                             </UML:ModelElement.taggedValue>
                                         </UML:ClassifierRole>
                                         ';
-                                        $iterador++;
-                                        }
-                                    }
-                                    $objetos .= '
-                                    </UML:Namespace.ownedElement>
-                                    <UML:Collaboration.interaction/>
-                                </UML:Collaboration>
+                $iterador++;
+            }
+        }
+        $objetos .= '       </UML:Namespace.ownedElement>
+                                <UML:Collaboration.interaction>
+                                    <UML:Interaction xmi.id="EAID_68FDBDA8_B4B6_41a3_90A1_3301F4D1425D_INT" name="EAID_68FDBDA8_B4B6_41a3_90A1_3301F4D1425D_INT">
+                                        <UML:Interaction.message>
+                                        ';
+
+
+        foreach ($enlaces as $e) {
+            $from = artefacto::where('key', $e->from)->first();
+            $to = artefacto::where('key', $e->to)->first();
+            $objetos .= '
+
+
+
+                                    <UML:Message name="' . $e->text . '" xmi.id="EAID_BE1BC252_1AB2_4cb3_9BDD_CC0BE0BB9A' . $e->id . '" visibility="public" sender="EAID_60C48589_16F7_4c60_B7B2_862227190FC' . $from->id . '" receiver="EAID_60C48589_16F7_4c60_B7B2_862227190FC' . $to->id . '">
+                                        <UML:ModelElement.taggedValue>
+                                            <UML:TaggedValue tag="style" value="1"/>
+                                            <UML:TaggedValue tag="ea_type" value="Sequence"/>
+                                            <UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
+                                            <UML:TaggedValue tag="linemode" value="1"/>
+                                            <UML:TaggedValue tag="linecolor" value="-1"/>
+                                            <UML:TaggedValue tag="linewidth" value="0"/>
+                                            <UML:TaggedValue tag="seqno" value="1"/>
+                                            <UML:TaggedValue tag="headStyle" value="0"/>
+                                            <UML:TaggedValue tag="lineStyle" value="0"/>
+                                            <UML:TaggedValue tag="privatedata1" value="Synchronous"/>
+                                            <UML:TaggedValue tag="privatedata2" value="retval=void;"/>
+                                            <UML:TaggedValue tag="privatedata3" value="Call"/>
+                                            <UML:TaggedValue tag="privatedata4" value="0"/>
+                                            <UML:TaggedValue tag="ea_localid" value="376"/>
+                                            <UML:TaggedValue tag="ea_sourceName" value="' . $e->from . '"/>
+                                            <UML:TaggedValue tag="ea_targetName" value="' . $e->to . '"/>
+                                            <UML:TaggedValue tag="ea_sourceType" value="Actor"/>
+                                            <UML:TaggedValue tag="ea_targetType" value="Sequence"/>
+                                            <UML:TaggedValue tag="ea_sourceID" value="' . $from->id . '"/>
+                                            <UML:TaggedValue tag="ea_targetID" value="' . $to->id . '"/>
+                                            <UML:TaggedValue tag="src_visibility" value="Public"/>
+                                            <UML:TaggedValue tag="src_isOrdered" value="false"/>
+                                            <UML:TaggedValue tag="src_targetScope" value="instance"/>
+                                            <UML:TaggedValue tag="src_changeable" value="none"/>
+                                            <UML:TaggedValue tag="src_isNavigable" value="false"/>
+                                            <UML:TaggedValue tag="src_containment" value="Unspecified"/>
+                                            <UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
+                                            <UML:TaggedValue tag="dst_visibility" value="Public"/>
+                                            <UML:TaggedValue tag="dst_aggregation" value="0"/>
+                                            <UML:TaggedValue tag="dst_isOrdered" value="false"/>
+                                            <UML:TaggedValue tag="dst_targetScope" value="instance"/>
+                                            <UML:TaggedValue tag="dst_changeable" value="none"/>
+                                            <UML:TaggedValue tag="dst_isNavigable" value="true"/>
+                                            <UML:TaggedValue tag="dst_containment" value="Unspecified"/>
+                                            <UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
+                                            <UML:TaggedValue tag="privatedata5" value="SX=0;SY=-35;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
+                                            <UML:TaggedValue tag="sequence_points" value="PtStartX=50;PtStartY=-170;PtEndX=299;PtEndY=-170;"/>
+                                            <UML:TaggedValue tag="stateflags" value="Activation=0;ExtendActivationUp=0;"/>
+                                            <UML:TaggedValue tag="virtualInheritance" value="0"/>
+                                            <UML:TaggedValue tag="diagram" value="EAID_153B4DB8_69DA_4d41_887F_57EF64196586"/>
+                                            <UML:TaggedValue tag="mt" value="' . $e->text . '"/>
+                                        </UML:ModelElement.taggedValue>
+                                    </UML:Message>
+                                    ';
+        }
+
+
+        $objetos .= '
+                                </UML:Interaction.message>
+                            </UML:Interaction>
+                        </UML:Collaboration.interaction>
+                    </UML:Collaboration>
                             </UML:Namespace.ownedElement>
                         </UML:Package>
                     </UML:Namespace.ownedElement>
@@ -362,21 +436,27 @@ class DiagramadorController extends Controller
                     </UML:ModelElement.taggedValue>
                     <UML:Diagram.element>';
 
-                    $html .= $objetos;
-                    $contadorx = 100;
-                    $contadory = 190;
-                    $i = 1;
-                    $pie = '';
+        $html .= $objetos;
+        $left = 0;
+        $resultado = 0;
+        $i = 1;
+        $pie = '';
 
-                    foreach ($artefactos as $a) {
-                    $pie .= '
-                        <UML:DiagramElement geometry="Left=' . $contadorx . ';Top=50;Right=' . $contadorx . ';Bottom=276;" subject="EAID_60C48589_16F7_4c60_B7B2_862227190FC' . $a->id . '" seqno="' . $i . '" style="DUID=12345JC' . $a->id . ';"/>
+        foreach ($artefactos as $a) {
+            $resultado = $left + 90;
+            $pie .= '
+                        <UML:DiagramElement geometry="Left=' . $left . ';Top=50;Right=' . $resultado . ';Bottom=276;" subject="EAID_60C48589_16F7_4c60_B7B2_862227190FC' . $a->id . '" seqno="' . $i . '" style="DUID=12345JC' . $a->id . ';"/>
                         ';
-                        $contadorx = $contadorx + 160;
-                        $contadory = $contadory + 160;
-                        $i++;
-                    }
-                    $pie .= '
+            $left += 100;
+            $i++;
+        }
+        foreach ($enlaces as $e) {
+
+            $pie .= '
+                        <UML:DiagramElement geometry="SX=0;SY=0;EX=0;EY=0;Path=;" subject="EAID_BE1BC252_1AB2_4cb3_9BDD_CC0BE0BB9A' . $e->id . '" style=";Hidden=0;"/>
+                        ';
+        }
+        $pie .= '
                     </UML:Diagram.element>
                 </UML:Diagram>
             </XMI.content>
@@ -386,15 +466,12 @@ class DiagramadorController extends Controller
 
         $html .= $pie;
 
-        // $view = view('Exportar.architec', ['artefactos' => $artefactos, 'enlaces' => $enlaces, 'grupos' => $grupos]);
-        // $view = view('Exportar.architec');
 
         $fecha = date('Y-m-d');
-        // $htmlContent = $html->render();
 
         $headers = [
             'Content-type'        => 'text/html; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="Mydiagram-' . $fecha . '.xml"',
+            'Content-Disposition' => 'attachment; filename="pizarra-' . $fecha . '.xml"',
         ];
 
         return new Response($html, 200, $headers);
@@ -409,19 +486,19 @@ class DiagramadorController extends Controller
         $parte1 = '';
         $parte2 = '';
 
-        $parte1 .='@Controller
-        public class ' . preg_replace('/[\s(){}\[\]-]/', '',$diagramador->titulo) .' {
+        $parte1 .= '@Controller
+        public class ' . preg_replace('/[\s(){}\[\]-]/', '', $diagramador->titulo) . ' {
         ';
-        foreach($enlaces as $f){
-        $parte2 .='
-        @RequestMapping("/'. preg_replace('/[\s(){}\[\]-]/', '',$f->text) .'")
-        public String '. preg_replace('/[\s(){}\[\]-]/', '',$f->text) .'() {
+        foreach ($enlaces as $f) {
+            $parte2 .= '
+        @RequestMapping("/' . preg_replace('/[\s(){}\[\]-]/', '', $f->text) . '")
+        public String ' . preg_replace('/[\s(){}\[\]-]/', '', $f->text) . '() {
         // Lógica para mostrar una página de inicio
-        return "'. preg_replace('/[\s(){}\[\]-]/', '',$f->text) .'";
+        return "' . preg_replace('/[\s(){}\[\]-]/', '', $f->text) . '";
         }
         ';
         }
-        $parte2 .='
+        $parte2 .= '
         }
         ';
 
@@ -431,7 +508,7 @@ class DiagramadorController extends Controller
 
         $headers = [
             'Content-type'        => 'text/html; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="CodeJava-' . $fecha . '.java"',
+            'Content-Disposition' => 'attachment; filename="codigo-java-' . $fecha . '.java"',
         ];
 
         return new Response($parte1, 200, $headers);
@@ -444,14 +521,14 @@ class DiagramadorController extends Controller
         $parte1 = '';
         $parte2 = '';
 
-        $parte1 .='from django.shortcuts import render, redirect, get_object_or_404
-        from .' . $diagramador->titulo .' import Recurso
+        $parte1 .= 'from django.shortcuts import render, redirect, get_object_or_404
+        from .' . $diagramador->titulo . ' import Recurso
         ';
-        foreach($enlaces as $f){
-        $parte2 .='
-        def '. preg_replace('/[\s(){}\[\]-]/', '',$f->text) .'(request):
+        foreach ($enlaces as $f) {
+            $parte2 .= '
+        def ' . preg_replace('/[\s(){}\[\]-]/', '', $f->text) . '(request):
         # Lógica para mostrar una vista principal
-        return render(request,"'. preg_replace('/[\s(){}\[\]-]/', '',$f->text) .'")
+        return render(request,"' . preg_replace('/[\s(){}\[\]-]/', '', $f->text) . '")
         ';
         }
 
@@ -476,25 +553,25 @@ class DiagramadorController extends Controller
         $parte1 = '';
         $parte2 = '';
 
-        $parte1 .='<?php
+        $parte1 .= '<?php
 
         namespace App\Http\Controllers;
 
-        use App\Models\ ' . $diagramador->titulo .';
+        use App\Models\ ' . $diagramador->titulo . ';
         use Illuminate\Http\Request;
 
-        class ' . $diagramador->titulo .' extends Controller
+        class ' . $diagramador->titulo . ' extends Controller
         {
         ';
-        foreach($enlaces as $f){
-        $parte2 .='
-        public function '. preg_replace('/[\s(){}\[\]-]/', '',$f->text) .'()
+        foreach ($enlaces as $f) {
+            $parte2 .= '
+        public function ' . preg_replace('/[\s(){}\[\]-]/', '', $f->text) . '()
         {
             // Lógica para mostrar una vista principal
         }
         ';
         }
-        $parte2 .='
+        $parte2 .= '
         }
         ';
 

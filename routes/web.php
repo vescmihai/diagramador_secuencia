@@ -18,8 +18,9 @@ use App\Http\Controllers\DiagramadorController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    // redirect()->route('dashboard');
+    return view('layouts.app');
+})->middleware('auth');
 
 Route::middleware([
     'auth:sanctum',
