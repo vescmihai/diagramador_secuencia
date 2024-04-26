@@ -6,7 +6,7 @@
     "file": "assets/index-fb0b8ccc.js"
   },
   "resources/css/app.css": {
-    "file": "assets/app-da038223.css",
+    "file": "assets/app-70758bdc.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
@@ -32,7 +32,7 @@
     "src": "resources/js/custom-modal.js"
   },
   "resources/js/diagramador.js": {
-    "file": "assets/diagramador-e76c7e49.js",
+    "file": "assets/diagramador-738c68fe.js",
     "imports": [
       "_index-fb0b8ccc.js"
     ],

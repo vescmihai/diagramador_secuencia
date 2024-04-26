@@ -586,4 +586,8 @@ class DiagramadorController extends Controller
 
         return new Response($parte1, 200, $headers);
     }
+
+    public function eliminarArtefacto(){
+        
+    }
 }

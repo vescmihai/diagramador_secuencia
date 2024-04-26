@@ -24,15 +24,15 @@
         <div class="container mx-auto mt-8">
             <div class="w-full bg-white rounded-lg shadow-md p-4">
                 <div class="flex justify-between items-center">
-                    <h1 class="text-3xl font-semibold my-4">Mis Pizarras</h1>
+                    <h1 class="text-3xl font-semibold my-4">Mis Diagramas</h1>
                 </div>
                 <div class="text-right w-full">
                     <form action="{{ route('diagramador.store') }}" method="POST" class="mb-4">
                         @csrf
                         <div class="flex justify-center mb-8">
-                            <input type="text" name="titulo" placeholder="Ingrese un Titulo" required
-                                class="border border-gray-300 px-4 py-2 rounded-l-md w-64">
-                            <button class="bg-green-500 text-white px-4 py-2 rounded-r-md">Crear</button>
+                            <input type="text" name="titulo" placeholder="Nuevo diagrama" required
+                                class="border border-yellow-300 px-4 py-2 rounded-l-md w-64">
+                            <button class="bg-yellow-500 text-white px-4 py-2 rounded-r-md">+</button>
                         </div>
                     </form>
                 </div>
@@ -85,29 +85,29 @@
                     @foreach ($arrayDiagramas as $diagrama)
                         <div class="max-w-md bg-white p-8 rounded-md shadow-md m-2">
                             <!-- Imagen -->
-                            <img src="https://www.gliffy.com/sites/default/files/image/2020-07/image-blog-uml-2-5-diagram-types_0.jpg"
-                                alt="Imagen" class="w-full h-32 object-cover mb-4 rounded-md">
+                            <img src="{{ asset('img/uml.png') }}" alt="Descripción de la imagen" class="w-full h-32 object-cover mb-4 rounded-md">
 
                             <!-- Título -->
                             <h2 class="text-xl font-semibold mb-2">{{ $diagrama['titulo'] }}</h2>
 
                             <!-- Autor -->
-                            <p class="text-gray-600 mb-4">Autor: {{ $diagrama['autornombre'] }}</p>
+                            <p class="text-gray-600 mb-4">{{ $diagrama['autornombre'] }}</p>
 
                             <!-- Botones -->
                             <div class="flex space-x-4">
-                                <a href="{{ route('diagramador.edit', $diagrama['id_diagrama']) }}"
-                                    class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Editar</a>
-                                <a href="{{ route('invitar', $diagrama['id_diagrama']) }}"
-                                    class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Invitar</a>
+                                <!--<a href="{{ route('diagramador.edit', $diagrama['id_diagrama']) }}"
+                                    class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Editar</a>-->
+                                
                                 <a href="{{ route('diagramador.show', $diagrama['id_diagrama']) }}"
-                                    class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600">Trabajar</a>
-                                <form action="{{ route('diagramador.destroy', $diagrama['id_diagrama']) }}" method="POST"
+                                    class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600">Ingresar a sala</a>
+                                    <a href="{{ route('invitar', $diagrama['id_diagrama']) }}"
+                                    class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">Invitar</a>
+                                    <form action="{{ route('diagramador.destroy', $diagrama['id_diagrama']) }}" method="POST"
                                     class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
-                                        class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Eliminar</button>
+                                        class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Abandonar</button>
                                 </form>
                             </div>
                         </div>
@@ -123,7 +123,7 @@
         <div>
             <div class="container mx-auto mt-8">
                 <div class="w-full bg-white rounded-lg shadow-md p-4">
-                    <h1 class="text-3xl font-semibold my-4">Trabajos en colaboración</h1>
+                    <h1 class="text-3xl font-semibold my-4">Colaboraciones</h1>
                     {{-- <table class="min-w-full border border-collapse border-gray-300">
                         <thead>
                             <tr>
@@ -162,33 +162,31 @@
                         </tbody>
                     </table> --}}
                     @foreach ($diagramasInvitados as $diagrama)
-                        <div class="max-w-md bg-white p-8 rounded-md shadow-md m-2">
-                            <!-- Imagen -->
-                            <img src="https://fiverr-res.cloudinary.com/images/t_main1,q_auto,f_auto,q_auto,f_auto/gigs/127887274/original/7c285ea64df36b830597d84a24a148f0a22ca6f7/write-a-my-sql-queries-end-create-erd-for-your-database.png"
-                                alt="Imagen" class="w-full h-32 object-cover mb-4 rounded-md">
+                    <div class="max-w-md bg-white p-8 rounded-md shadow-md m-2">
+    <!-- Imagen -->
+    <img src="{{ asset('img/uml.png') }}" alt="Descripción de la imagen" class="w-full h-32 object-cover mb-4 rounded-md">
 
-                            <!-- Título -->
-                            <h2 class="text-xl font-semibold mb-2">{{ $diagrama['titulo'] }}</h2>
+    <!-- Título -->
+    <h2 class="text-xl font-semibold mb-2">{{ $diagrama['titulo'] }}</h2>
 
-                            <!-- Autor -->
-                            <p class="text-gray-600 mb-4">Autor: {{ $diagrama['autornombre'] }}</p>
+    <!-- Autor -->
+    <p class="text-gray-600 mb-4">{{ $diagrama['autornombre'] }}</p>
 
-                            <!-- Botones -->
-                            <div class="flex space-x-4">
-                                <a href="{{ route('diagramador.show', $diagrama['id']) }}"
-                                    class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Trabajar</a>
-                                    <form action="{{ route('invitadoDelete') }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('POST')
-                                        <input type="text" name="id_diagrama" value="{{ $diagrama['id'] }}"
-                                            class="hidden">
-                                        <input type="text" name="id_invitado" value="{{ $email }}"
-                                            class="hidden">
-                                    <button type="submit"
-                                        class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Abandonar</button>
-                                </form>
-                            </div>
-                        </div>
+    <!-- Botones -->
+    <div class="flex flex-col items-center">
+        <div class="flex space-x-4">
+            <a href="{{ route('diagramador.show', $diagrama['id']) }}" class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600">Ingresar a sala</a>
+            <form action="{{ route('invitadoDelete') }}" method="POST" class="inline">
+                @csrf
+                @method('POST')
+                <input type="text" name="id_diagrama" value="{{ $diagrama['id'] }}" class="hidden">
+                <input type="text" name="id_invitado" value="{{ $email }}" class="hidden">
+                <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Abandonar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
                     @endforeach
                 </div>
             </div>

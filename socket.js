@@ -1,10 +1,10 @@
-// import express from 'express';
-// import { Server } from 'socket.io';
-// import http from 'http';
+import express from 'express';
+import { Server } from 'socket.io';
+import http from 'http';
 
-const express = require('express');
-const { Server } = require('socket.io');
-const http = require('http');
+// const express = require('express');
+// const { Server } = require('socket.io');
+// const http = require('http');
 
 
 const app = express();
@@ -73,5 +73,5 @@ io.on('connection', socket => {
 
 server.listen(3000, (err) => {
     if (err) throw new Error(err);
-    console.log('listening on *:3000');
+    console.log('listening on *:3000');
 });

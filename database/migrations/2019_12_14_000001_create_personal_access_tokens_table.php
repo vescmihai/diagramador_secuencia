@@ -13,13 +13,17 @@ return new class extends Migration
     {
         Schema::create('personal_access_tokens', function (Blueprint $table) {
             $table->id();
-            $table->morphs('tokenable');
+            $table->string('tokenable_type', 191); // Especifica la longitud máxima
+            $table->unsignedBigInteger('tokenable_id');
             $table->string('name');
             $table->string('token', 64)->unique();
             $table->text('abilities')->nullable();
             $table->timestamp('last_used_at')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
+
+            // Agrega el índice después de definir las columnas con longitud
+            $table->index(['tokenable_type', 'tokenable_id']);
         });
     }
 
